@@ -6,9 +6,9 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="<?php echo base_url('login'); ?>" method="post">
-        <label for="username">Username</label>
-        <input type="text" name="username" placeholder="Username">
+    <form action="<?php echo base_url('Login/login'); ?>" method="post">
+        <label for="email">Email</label>
+        <input type="text" name="email" placeholder="Email">
         <label for="password">Password</label>
         <input type="password" name="password" placeholder="Password">
         <button type="submit">Login</button>

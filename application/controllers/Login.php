@@ -5,53 +5,46 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Login extends CI_Controller {
     function __construct() {
         parent::__construct();
-        
+        $this->load->model('User_model');
+        $this->load->helper('url');
+        $this->load->library('session');
     }
     public function index() {
         $this->load->view('login');
     }
 
     public function login() {
-        $email = $this->input->post('email');
+        $email    = $this->input->post('email');
         $password = $this->input->post('password');
         
-        $this->load->model('User_model');
         $user = $this->User_model->find_by_email($email);
 
-        // Debugging tip: print_r($user); to see the data structure if it still fails
-
         if ($user && password_verify($password, $user['password_hash'])) {
+            if ($user['email_verified'] == 0) {
+                $this->session->set_flashdata('error', 'Your email is not verified. Please check your inbox for the verification link.');
+                redirect('Login');
+                return;
+            }
+
             // Success: Set session and redirect
             $this->session->set_userdata([
-                'user_id' => $user['user_id'],
-                'email'   => $user['email'],
-                'role'    => $user['role'],
+                'user_id'   => $user['user_id'],
+                'email'     => $user['user_name'],
+                'role'      => $user['role'],
                 'logged_in' => TRUE
             ]);
             
-            echo "Login successful! Welcome " . $user['email']; 
-            // redirect('dashboard'); 
+            redirect('dashboard');
         } else {
-            echo "Invalid email or password";
-            echo "<br>";
-            echo $user['password_hash'];
-            echo "<br>";
-            echo $password;
-            // redirect('login');
+            $this->session->set_flashdata('error', 'Invalid email or password.');
+            redirect('Login');
         }
-    }
-
-    public function signup(){
-
     }
 
     public function logout(){
 
     }  
     
-    public function verifyEmail(){
-
-    }
     public function resetPassword(){
 
     }

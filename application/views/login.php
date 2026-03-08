@@ -30,5 +30,9 @@
         <br>
         <button type="submit">Login</button>
     </form>
+    <br><br>
+    <a href="<?php echo base_url('Login/forgotPassword'); ?>">Forgot Password?</a>
+    <br><br>
+    <a href="<?php echo base_url('Signup'); ?>">Don't have an account? Sign up</a>
 </body>
 </html>

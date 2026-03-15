@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
@@ -49,15 +49,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'welcome';
+$route['default_controller'] = 'Auth';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
-$route['login'] = 'Login/index';
-$route['signup'] = 'Signup/index';
-$route['dashboard'] = 'Dashboard/index';
-$route['forgot_password']        = 'Login/forgotPassword';
-$route['send_otp']               = 'Login/sendOtp';
-$route['verify_otp']             = 'Login/verifyOtp';
-$route['check_otp']              = 'Login/checkOtp';
-$route['reset_password']         = 'Login/resetPassword';
-$route['save_password']          = 'Login/savePassword';
+
+// =================================================================
+// REST API Routes base Auth Controller (Auth.php)
+// All accept JSON bodies and return JSON responses
+// =================================================================
+$route['api/register']         = 'Auth/register';
+$route['api/verify-email']     = 'Auth/verify_email';
+$route['api/login']            = 'Auth/login';
+$route['api/logout']           = 'Auth/logout';
+$route['api/forgot-password']  = 'Auth/forgot_password';
+$route['api/verify-otp']       = 'Auth/verify_otp';
+$route['api/reset-password']   = 'Auth/reset_password';

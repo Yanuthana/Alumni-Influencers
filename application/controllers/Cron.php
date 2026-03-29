@@ -14,6 +14,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * Or via PHP CLI (no web server needed):
  *   0 18 * * * /Applications/XAMPP/xamppfiles/bin/php /Applications/XAMPP/xamppfiles/htdocs/Alumni-Influencers/cron_winner.php >> /tmp/alumni_cron.log 2>&1
  *
+/**
+ * @OA\Tag(
+ *     name="Cron Jobs",
+ *     description="Automated scheduled tasks"
+ * )
  * @property CI_Input      $input
  * @property CI_Output     $output
  * @property CI_Loader     $load
@@ -42,6 +47,16 @@ class Cron extends CI_Controller {
      *
      * This method is meant to be triggered ONLY by the cron job at 18:00.
      * It validates a shared secret key before executing the logic.
+     */
+    /**
+     * @OA\Get(
+     *     path="/api/cron/winner_selection",
+     *     summary="Select winner for today's slot",
+     *     tags={"Cron Jobs"},
+     *     @OA\Parameter(name="cron_key", in="query", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Executed"),
+     *     @OA\Response(response=403, description="Invalid cron key")
+     * )
      */
     public function winner_selection() {
         // Verify shared secret (works for both CLI and HTTP cron calls)

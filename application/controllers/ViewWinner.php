@@ -4,10 +4,21 @@ defined('BASEPATH') or exit('No direct script access allowed');
 require_once APPPATH . 'core/BaseApiController.php';
 
 /**
+ * @OA\Tag(
+ *     name="Featured Alumni",
+ *     description="Endpoints for viewing daily winners"
+ * )
  * @property SlotResult_model $slotresult_model
+ * @property Api_log_model $api_log_model
+ * @property CI_Security $security
  */
 class  ViewWinner extends BaseApiController
 {
+    /**
+     * Optional fallback key for non-Kong access in production.
+     * Use query param: ?gateway_key=...
+     */
+    private const FEATURED_ALUMNI_GATEWAY_KEY = 'FEATURED_ALUMNI_GATEWAY_KEY_CHANGE_ME';
 
     public function __construct()
     {
@@ -15,13 +26,94 @@ class  ViewWinner extends BaseApiController
         $this->load->model('slotresult_model');
     }
 
+    private function _kong_header(string $name): ?string
+    {
+        $header = $this->input->get_request_header($name, true);
+        if ($header === null) {
+            return null;
+        }
+
+        $header = trim($header);
+        return $header === '' ? null : $this->security->xss_clean($header);
+    }
+
+    private function _get_consumer_identity(): ?string
+    {
+        $consumerUsername = $this->_kong_header('X-Consumer-Username');
+        if (!empty($consumerUsername)) {
+            return $consumerUsername;
+        }
+
+        $consumerId = $this->_kong_header('X-Consumer-ID');
+        if (!empty($consumerId)) {
+            return $consumerId;
+        }
+
+        return null;
+    }
+
+    private function _is_from_kong(): bool
+    {
+        // Prefer Kong-native headers (present even before auth headers are injected).
+        // This avoids false 403s if Kong is in front but consumer headers are not forwarded for some reason.
+        if (!empty($this->_kong_header('X-Kong-Request-Id'))) {
+            return true;
+        }
+        if (!empty($this->_kong_header('X-Kong-Proxy-Latency')) || !empty($this->_kong_header('X-Kong-Upstream-Latency'))) {
+            return true;
+        }
+
+        // Fallback: Kong injects consumer headers after authentication succeeds.
+        return !empty($this->_kong_header('X-Consumer-Username')) || !empty($this->_kong_header('X-Consumer-ID'));
+    }
+
+    private function _allow_non_kong_request(): bool
+    {
+        // Local/dev/test should not be blocked when Kong is absent.
+        if (defined('ENVIRONMENT') && ENVIRONMENT !== 'production') {
+            return true;
+        }
+
+        // Optional production fallback with shared key (if needed temporarily).
+        $gatewayKey = (string) $this->input->get('gateway_key', true);
+        return $gatewayKey !== '' && hash_equals(self::FEATURED_ALUMNI_GATEWAY_KEY, $gatewayKey);
+    }
+
+
+    /**
+     * @OA\Get(
+     *     path="/api/featured-alumni",
+     *     summary="View the daily featured alumni",
+     *     tags={"Featured Alumni"},
+     *     security={{"apiKeyAuth": {}}},
+     *     @OA\Parameter(name="slot_id", in="query", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Winner found"),
+     *     @OA\Response(response=404, description="No winner for this slot")
+     * )
+     */
     public function view_winner()
     {
-        $slotId = $this->input->get('slot_id');
-        if (!$slotId) {
-            $this->_respond(400, ['status' => 'error', 'message' => 'slot_id query parameter is required']);
+        $this->_require_api_key();
+
+        if (!$this->_is_from_kong() && !$this->_allow_non_kong_request()) {
+            $this->_respond(403, [
+                'status'  => 'error',
+                'message' => 'Forbidden: request must pass through Kong gateway (or provide valid gateway_key outside Kong)',
+            ]);
         }
+
+        $slotIdRaw = $this->input->get('slot_id', true);
+        $slotId = filter_var($slotIdRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        if ($slotId === false) {
+            $this->_respond(400, [
+                'status'  => 'error',
+                'message' => 'slot_id query parameter is required and must be a positive integer',
+            ]);
+        }
+
         $result = $this->slotresult_model->view_winner($slotId);
+
         if ($result['status']) {
             $this->_respond(200, [
                 'status'  => 'success',

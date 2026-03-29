@@ -27,113 +27,156 @@ class SlotResult_model extends CI_Model {
     // ---------------------------------------------------------------
 
     /**
-     * Automatically predict and save the winner for TODAY's slot.
+     * Select and persist winners for all slots on a given slot_date.
      *
-     * This method is designed to be called by a cron job at 18:00 (6 PM).
-     * It processes the slot for the current day.
+     * Tie-breaker when multiple bids share the same max bid_amount:
+     *  - lowest bid_id wins (earliest inserted)
      *
-     * Workflow:
-     *  1. Find today's slot (slot_date = today).
-     *  2. Check if a result already exists for this slot.
-     *  3. Find the highest ACTIVE bid for this slot.
-     *  4. Insert a row into Slot_Result.
-     *  5. Upsert the winner's monthly_limit row (inc wins_count).
-     *  6. Mark the winning bid as WON and all others as LOST.
-     *  7. Mark the winner's alumni_profiles row with is_winner = 1.
-     *  8. Send an email notification to the winner.
-     *
-     * Cron example (runs at 18:00 every day):
-     *   0 18 * * * /Applications/XAMPP/xamppfiles/bin/php \
-     *              /Applications/XAMPP/xamppfiles/htdocs/Alumni-Influencers/cron_winner.php >> /tmp/alumni_cron.log 2>&1
+     * Notes:
+     *  - "Today's bids" are implicitly the bids for slots where Slot.slot_date = $slotDate.
+     *  - Winner validity 6PM→6PM is driven by your Slot bidding window; this job runs at 18:00.
      *
      * @return array ['status' => bool, 'message' => string, 'data' => array|null]
      */
-    public function predict_winner() {
-        $today = date('Y-m-d');
-
-        // 1. Get today's slot
-        $slot = $this->db->get_where('Slot', ['slot_date' => $today])->row_array();
-        if (!$slot) {
-            return ['status' => false, 'message' => "No slot found for today ({$today})"];
+    public function predict_winners_for_date(string $slotDate): array
+    {
+        // 1) Load the single slot for the requested date.
+        // Business rule: exactly ONE slot exists per slot_date (result date at 18:00).
+        $slots = $this->db->get_where('Slot', ['slot_date' => $slotDate])->result_array();
+        if (!$slots) {
+            return ['status' => false, 'message' => "No slot found for slot_date ({$slotDate})"];
         }
-
-        $slotId = $slot['slot_id'];
-
-        // 2. Check if result already recorded for this slot
-        $existing = $this->db->get_where('Slot_Result', ['slot_id' => $slotId])->row_array();
-        if ($existing) {
+        if (count($slots) > 1) {
             return [
                 'status'  => false,
-                'message' => "Winner already predicted for slot on {$today}",
-                'data'    => $existing,
+                'message' => "Data integrity error: multiple slots found for slot_date ({$slotDate}). Expected exactly 1."
             ];
         }
 
-        // 3. Find the highest ACTIVE bid for this slot
-        $this->db->select('Bid.bid_id, Bid.alumni_id, Bid.bid_amount');
-        $this->db->from('Bid');
-        $this->db->where('Bid.slot_id', $slotId);
-        $this->db->where('Bid.status', 'ACTIVE');
-        $this->db->order_by('Bid.bid_amount', 'DESC');
-        $this->db->limit(1);
-        $winningBid = $this->db->get()->row_array();
+        $processed   = [];
+        $created     = 0;
+        $skipped     = 0;
+        $noBids      = 0;
+        $winnerIds   = [];
 
-        if (!$winningBid) {
-            return ['status' => false, 'message' => "No active bids found for slot on {$today}. No winner to predict."];
-        }
+        $this->db->trans_start();
 
-        $winningBidId   = $winningBid['bid_id'];
-        $winnerAlumniId = $winningBid['alumni_id'];
+        foreach ($slots as $slot) {
+            $slotId = $slot['slot_id'];
 
-        // 4. Insert into Slot_Result
-        $this->db->insert('Slot_Result', [
-            'slot_id'           => $slotId,
-            'winning_bid_id'    => $winningBidId,
-            'winning_alumni_id' => $winnerAlumniId,
-        ]);
-        $resultId = $this->db->insert_id();
+            // 2) Skip if already has a result for this slot_id
+            $existing = $this->db->get_where('Slot_Result', ['slot_id' => $slotId])->row_array();
+            if ($existing) {
+                $skipped++;
+                $processed[] = [
+                    'slot_id' => $slotId,
+                    'status'  => 'skipped',
+                    'message' => 'Winner already selected for this slot',
+                    'data'    => $existing,
+                ];
+                continue;
+            }
 
-        // 5. Upsert winner's monthly_limit record
-        $this->_incrementMonthlyWinCount($winnerAlumniId);
+            // 3) Highest ACTIVE bid for this slot, with deterministic tie-breaker
+            $this->db->select('Bid.bid_id, Bid.alumni_id, Bid.bid_amount');
+            $this->db->from('Bid');
+            $this->db->where('Bid.slot_id', $slotId);
+            $this->db->where('Bid.status', 'ACTIVE');
+            $this->db->order_by('Bid.bid_amount', 'DESC');
+            $this->db->order_by('Bid.bid_id', 'ASC');
+            $this->db->limit(1);
+            $winningBid = $this->db->get()->row_array();
 
-        // 6. Mark winning bid as WON, all other active bids for this slot as LOST
-        $this->db->where('bid_id', $winningBidId);
-        $this->db->update('Bid', ['status' => 'WON']);
+            if (!$winningBid) {
+                $noBids++;
+                $processed[] = [
+                    'slot_id' => $slotId,
+                    'status'  => 'no_bids',
+                    'message' => 'No active bids for this slot',
+                ];
+                continue;
+            }
 
-        $this->db->where('slot_id', $slotId);
-        $this->db->where('bid_id !=', $winningBidId);
-        $this->db->where('status', 'ACTIVE');
-        $this->db->update('Bid', ['status' => 'LOST']);
+            $winningBidId   = $winningBid['bid_id'];
+            $winnerAlumniId = $winningBid['alumni_id'];
 
-        // 7. Mark winner's profile as winner (is_winner = 1)
-        $existingProfile = $this->db
-            ->get_where('alumni', ['alumni_id' => $winnerAlumniId])
-            ->row_array();
-
-        if ($existingProfile) {
-            $this->db->where('alumni_id', $winnerAlumniId);
-            $this->db->update('alumni', ['is_active_winner' => 1]);
-        } else {
-            $this->db->insert('alumni', [
-                'alumni_id' => $winnerAlumniId,
-                'is_active_winner' => 1,
+            // 4) Insert Slot_Result
+            $this->db->insert('Slot_Result', [
+                'slot_id'           => $slotId,
+                'winning_bid_id'    => $winningBidId,
+                'winning_alumni_id' => $winnerAlumniId,
             ]);
+            $resultId = $this->db->insert_id();
+
+            // 5) Increment monthly limit wins_count
+            $this->_incrementMonthlyWinCount($winnerAlumniId);
+
+            // 6) Mark winning bid as WON, all other ACTIVE bids as LOST
+            $this->db->where('bid_id', $winningBidId);
+            $this->db->update('Bid', ['status' => 'WON']);
+
+            $this->db->where('slot_id', $slotId);
+            $this->db->where('bid_id !=', $winningBidId);
+            $this->db->where('status', 'ACTIVE');
+            $this->db->update('Bid', ['status' => 'LOST']);
+
+            $winnerIds[] = $winnerAlumniId;
+            $created++;
+
+            $processed[] = [
+                'slot_id' => $slotId,
+                'status'  => 'created',
+                'message' => 'Winner selected',
+                'data'    => [
+                    'result_id'        => $resultId,
+                    'slot_id'          => $slotId,
+                    'slot_date'        => $slotDate,
+                    'winning_bid_id'   => $winningBidId,
+                    'winner_alumni_id' => $winnerAlumniId,
+                    'winning_amount'   => $winningBid['bid_amount'],
+                ],
+            ];
         }
-       
+
+        // 7) Mark current active winners; expire previous ones (system-wide flag)
+        // If you later need per-slot active winners, prefer a dedicated table keyed by slot_id.
+        $this->db->update('alumni', ['is_active_winner' => 0]);
+
+        $winnerIds = array_values(array_unique(array_filter($winnerIds)));
+        if (!empty($winnerIds)) {
+            $this->db->where_in('alumni_id', $winnerIds);
+            $this->db->update('alumni', ['is_active_winner' => 1]);
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === false) {
+            return ['status' => false, 'message' => 'Database transaction failed while selecting winners'];
+        }
+
         return [
             'status'  => true,
-            'message' => "Winner predicted and saved successfully for slot on {$today}",
+            'message' => "Winner selection finished for slot_date ({$slotDate})",
             'data'    => [
-                'result_id'        => $resultId,
-                'slot_id'          => $slotId,
-                'slot_date'        => $today,
-                'winning_bid_id'   => $winningBidId,
-                'winner_alumni_id' => $winnerAlumniId,
-                'winning_amount'   => $winningBid['bid_amount'],
-                
-            ]
+                'slot_date' => $slotDate,
+                'totals'    => [
+                    'slots'    => 1,
+                    'created'  => $created,
+                    'skipped'  => $skipped,
+                    'no_bids'  => $noBids,
+                ],
+                'results'   => $processed,
+            ],
         ];
-    }   
+    }
+
+    /**
+     * Backward-compatible wrapper: selects winners for today's slot_date.
+     */
+    public function predict_winner(): array
+    {
+        return $this->predict_winners_for_date(date('Y-m-d'));
+    }
 
     // ---------------------------------------------------------------
     // MONTHLY WIN LIMIT HELPERS

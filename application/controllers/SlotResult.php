@@ -4,13 +4,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
 require_once APPPATH . 'core/BaseApiController.php';
 
 /**
- * SlotResult Controller
- *
- * Handles:
- *  - POST api/predict_winner          → Trigger winner prediction for today's slot (admin/cron)
- *  - GET  api/slot_result             → View winner details for a given slot
- *  - GET  api/monthly_limit_status    → View an alumni's monthly win count
- *
+ * @OA\Tag(
+ *     name="Slot Result",
+ *     description="Endpoints for slot results and win limits"
+ * )
  * @property SlotResult_model $slotresult_model
  * @property Bidding_model    $bidding_model
  */
@@ -34,45 +31,23 @@ class SlotResult extends BaseApiController {
     }
 
     // ---------------------------------------------------------------
-    // POST api/predict_winner
-    // Protected: admin only (internal / cron-triggered endpoint)
-    // In production you would call this via a cron job at 18:00 daily.
-    // ---------------------------------------------------------------
-    /**
-     * Triggered every day at 6 PM (via cron job or admin call).
-     *
-     * Cron example (runs at 18:00 every day):
-     *   0 18 * * * curl -s -X POST http://yourdomain.com/api/predict_winner \
-     *                    -H "Authorization: Bearer <admin_token>"
-     */
-    public function predict_winner() {
-        $this->_require_role(['developer']);
-
-        $result = $this->slotresult_model->predict_winner();
-
-        if ($result['status']) {
-            $response = [
-                'status'  => 'success',
-                'message' => $result['message'],
-            ];
-            if (!empty($result['data'])) {
-                $response['data'] = $result['data'];
-            }
-            $this->_respond(200, $response);
-        } else {
-            $this->_respond(400, [
-                'status'  => 'error',
-                'message' => $result['message'],
-            ]);
-        }
-    }
-
-    // ---------------------------------------------------------------
     // GET api/slot_result?slot_id=X&user_id=Y
     // ---------------------------------------------------------------
     /**
-     * View the winner details for a specific slot.
-     * Any authenticated alumni can view this.
+     * @OA\Get(
+     *     path="/api/slots/result",
+     *     summary="View winner details for a specific slot",
+     *     tags={"Slot Result"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"slot_id"},
+     *             @OA\Property(property="slot_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Winner details"),
+     *     @OA\Response(response=404, description="No winner found")
+     * )
      */
     public function slot_result() {
         $this->_get_user_id(); // Just verifies auth

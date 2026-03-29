@@ -13,22 +13,14 @@
  * Cron::winner_selection() which runs predict_winner() on the model.
  */
 
-// ── 1. Tell CodeIgniter this is a CLI request ────────────────────────
-define('STDIN', fopen('php://stdin', 'r'));
-
-// ── 2. Fake a CLI-friendly server environment ───────────────────────
-$_SERVER['HTTP_HOST']      = 'localhost';
-$_SERVER['REQUEST_URI']    = '/api/cron/winner_selection';
-$_SERVER['REQUEST_METHOD'] = 'GET';
-$_SERVER['SCRIPT_NAME']    = '/index.php';
-$_SERVER['REMOTE_ADDR']    = '127.0.0.1';
-$_GET['cron_key']          = 'CRON_CLI'; // CLI path skips key validation
-
-// ── 3. Point to CodeIgniter front-controller ─────────────────────────
-$_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/index.php';
+// Run CodeIgniter via its native CLI routing:
+//   php index.php cron winner_selection
+//
+// This avoids relying on fake HTTP server variables and ensures the correct controller/method runs.
 chdir(__DIR__);
 
-echo "\n[" . date('Y-m-d H:i:s') . "] Running midnight winner selection...\n";
+// Ensure argv looks like a normal CI CLI invocation.
+$_SERVER['argv'] = ['index.php', 'cron', 'winner_selection'];
+$_SERVER['argc'] = count($_SERVER['argv']);
 
-// ── 4. Boot CodeIgniter ──────────────────────────────────────────────
 require_once __DIR__ . '/index.php';

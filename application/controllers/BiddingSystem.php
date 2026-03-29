@@ -5,6 +5,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
 require_once APPPATH . 'core/BaseApiController.php';
 
 /**
+ * @OA\Tag(
+ *     name="Bidding System",
+ *     description="Endpoints for slot bidding"
+ * )
  * @property Bidding_model $bidding_model
  */
 class BiddingSystem extends BaseApiController
@@ -29,6 +33,16 @@ class BiddingSystem extends BaseApiController
         }
         return $user_id;
     }
+    /**
+     * @OA\Get(
+     *     path="/api/slots",
+     *     summary="View available bidding slots",
+     *     tags={"Bidding System"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="List of slots"),
+     *     @OA\Response(response=500, description="Error fetching slots")
+     * )
+     */
     public function view_slots()
     {
         // Get tomorrow's slot (this will auto-create slots if needed)
@@ -49,6 +63,24 @@ class BiddingSystem extends BaseApiController
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/bids",
+     *     summary="Place a new bid",
+     *     tags={"Bidding System"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"slot_id","bid_amount"},
+     *             @OA\Property(property="slot_id", type="integer", example=1),
+     *             @OA\Property(property="bid_amount", type="number", example=50.0)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Bid placed"),
+     *     @OA\Response(response=400, description="Invalid input or bid rejected")
+     * )
+     */
     public function place_bid()
     {
         $d = $this->_json_body();
@@ -73,7 +105,8 @@ class BiddingSystem extends BaseApiController
         if ($result['status']) {
             $this->_respond(200, [
                 'status'  => 'success',
-                'message' => $result['message']
+                'message' => $result['message'],
+                'bid_id'  => $result['bid_id']
             ]);
         } else {
             $this->_respond(400, [

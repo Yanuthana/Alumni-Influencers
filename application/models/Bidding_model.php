@@ -69,6 +69,15 @@ class Bidding_model extends CI_Model
         }
     }
 
+    /**
+     * Cron-safe: ensure a slot exists for a given slot_date.
+     * slot_date is the "result date" at 18:00.
+     */
+    public function ensure_slot_exists(string $slotDate): void
+    {
+        $this->ensureSlotExists($slotDate);
+    }
+
 
     public function place_bid($bidpayload)
     {
@@ -116,7 +125,7 @@ class Bidding_model extends CI_Model
 
             // Insert into the Bids table
             if ($this->db->insert('Bid', $data)) {
-                return ['status' => true, 'message' => 'Bid placed successfully'];
+                return ['status' => true, 'message' => 'Bid placed successfully','bid_id'=>$this->db->insert_id()];
             }
         }
 

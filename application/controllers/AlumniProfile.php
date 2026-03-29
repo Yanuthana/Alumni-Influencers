@@ -8,19 +8,13 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 /**
- * AlumniProfile Controller
- *
- * Handles all manage REST API endpoints.
- * All methods:
- *   - Accept JSON request bodies
- *   - Return JSON responses with proper HTTP status codes
- *   - Are stateless (no PHP sessions)
- */
-/**
+ * @OA\Tag(
+ *     name="Alumni Profile",
+ *     description="Endpoints for managing alumni profiles"
+ * )
  * @property Profile_model $profile_model
  * @property CI_Email $email
  */
-
 class AlumniProfile extends BaseApiController{
     public function __construct()
     {
@@ -41,9 +35,20 @@ class AlumniProfile extends BaseApiController{
     }
 
     /**
-     * Get Alumni Profile
-     * /api/get_profile
-     * @return void
+     * @OA\Get(
+     *     path="/api/alumni/profile",
+     *     summary="Get alumni profile",
+     *     tags={"Alumni Profile"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Profile not found")
+     * )
      */
     public function get_profile(){
         $user_id = $this->_get_user_id();
@@ -57,6 +62,22 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200,['status'=>'success','data'=>$profile]);
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/alumni/profile/image",
+     *     summary="Update profile image",
+     *     tags={"Alumni Profile"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="profile_image_url", type="string", example="http://example.com/image.jpg")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Updated"),
+     *     @OA\Response(response=400, description="Invalid input")
+     * )
+     */
     public function update_profile_image()
     {
         $user_id = $this->_get_user_id();

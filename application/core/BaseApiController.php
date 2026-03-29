@@ -4,10 +4,27 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 /**
+ * @OA\Info(
+ *     title="Alumni Influencers API",
+ *     version="1.0.0",
+ *     description="API documentation for the Alumni Influencers platform"
+ * )
+ * @OA\Server(
+ *     url="http://localhost/Alumni-Influencers",
+ *     description="Local Development Server"
+ * )
+ * @OA\SecurityScheme(
+ *     securityScheme="bearerAuth",
+ *     type="http",
+ *     scheme="bearer",
+ *     bearerFormat="JWT"
+ * )
  * @property CI_Input  $input
  * @property CI_Output $output
  * @property CI_Loader $load
  * @property CI_Config $config
+ * @property CI_DB_query_builder $db
+ * @property Api_log_model $api_logs
  */
 class BaseApiController extends CI_Controller
 {
@@ -16,17 +33,37 @@ class BaseApiController extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('Api_log_model', 'api_logs');
     }
 
 
     protected function _respond(int $status, array $body): void
     {
+        $this->_log_request($status);
+
         $this->output
             ->set_status_header($status)
             ->set_content_type('application/json', 'utf-8')
             ->set_output(json_encode($body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         $this->output->_display();
         exit;
+    }
+
+    /**
+     * Log the current request.
+     */
+    private function _log_request(int $status): void
+    {
+        $consumer = $this->input->get_request_header('X-Consumer-Username', TRUE) 
+                  ?: $this->input->get_request_header('X-Consumer-ID', TRUE)
+                  ?: 'unknown';
+
+        $this->api_logs->create_log([
+            'client_id'  => $consumer,
+            'endpoint'   => $this->input->server('REQUEST_METHOD') . ' ' . $this->input->server('REQUEST_URI'),
+            'status'     => $status,
+            'ip_address' => $this->input->ip_address(),
+        ]);
     }
 
     /**
@@ -66,6 +103,36 @@ class BaseApiController extends CI_Controller
         $this->load->config('email', TRUE);
         $config = $this->config->item('email');
         $this->load->library('email', $config);
+    }
+
+    /**
+     * Require a valid Kong API key (checks injected headers)
+     * Returns the consumer username (e.g. email) if valid.
+     */
+    protected function _require_api_key(): string
+    {
+        // 1. Check for identifier injected by Kong
+        $consumer = $this->input->get_request_header('X-Consumer-Username', TRUE);
+        
+        if (!empty($consumer)) {
+            return $consumer;
+        }
+
+        // 2. Development Fallback: allow raw apikey header if not in production
+        if (ENVIRONMENT !== 'production') {
+            $apikey = $this->input->get_request_header('apikey', TRUE);
+            if (!empty($apikey)) {
+                return 'dev_consumer';
+            }
+        }
+
+        // 3. Reject the request if no valid identity is found
+        $this->_respond(401, [
+            'status'  => 'error',
+            'message' => 'Valid API Key is required inside the "apikey" header.'
+        ]);
+        
+        return ''; 
     }
 
     protected function _require_role(array $allowed_roles)

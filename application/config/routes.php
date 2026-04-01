@@ -54,68 +54,104 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 // =================================================================
-// REST API Routes base Auth Controller (Auth.php)
-// All accept JSON bodies and return JSON responses
+// RESTful API Routes (resource-based + correct HTTP verbs)
+//
+// Notes:
+// - CodeIgniter 3 supports HTTP-verb routing via:
+//     $route['path']['get|post|put|patch|delete'] = 'Controller/method'
+// - Controllers are kept as-is wherever possible.
+// - Old action-style routes are kept below as OPTIONAL backward-compat routes (commented).
 // =================================================================
-$route['api/register']         = 'Auth/register';
-$route['api/verify-email']     = 'Auth/verify_email';
-$route['api/login']            = 'Auth/login';
-$route['api/logout']           = 'Auth/logout';
-$route['api/forgot-password']  = 'Auth/forgot_password';
-$route['api/verify-otp']       = 'Auth/verify_otp';
-$route['api/reset-password']   = 'Auth/reset_password';
 
-// Alumni Profile Routes
-$route['api/get_profile']                     = 'AlumniProfile/get_profile';
-$route['api/update_profile_image']            = 'AlumniProfile/update_profile_image';
-$route['api/update_linkedin_url']             = 'AlumniProfile/update_linkedin_url';
+// -------------------------
+// /api/auth/*
+// -------------------------
+$route['api/auth/register']['post']                = 'Auth/register';
+$route['api/auth/email/verify']['post']            = 'Auth/verify_email';
+$route['api/auth/sessions']['post']                = 'Auth/login';           // create session (login)
+$route['api/auth/sessions']['delete']              = 'Auth/logout';          // destroy session (logout)
+$route['api/auth/password/forgot']['post']         = 'Auth/forgot_password';
+$route['api/auth/password/otp/verify']['post']     = 'Auth/verify_otp';
+$route['api/auth/password/reset']['post']          = 'Auth/reset_password';
 
-// Degrees
-$route['api/add_degrees']                     = 'AlumniProfile/add_degrees';
-$route['api/update_degrees']                  = 'AlumniProfile/update_degrees';
-$route['api/delete_degrees']                  = 'AlumniProfile/delete_degrees';
+// -------------------------
+// /api/alumni/*
+// -------------------------
+// Profile
+$route['api/alumni/profile']['get']                = 'AlumniProfile/get_profile';
+$route['api/alumni/profile/image']['put']          = 'AlumniProfile/update_profile_image';
+$route['api/alumni/profile/linkedin']['put']       = 'AlumniProfile/update_linkedin_url';
+$route['api/alumni/profile/completion-status']['get'] = 'AlumniProfile/update_completion_status';
+
+// Degrees (stored as list -> operations currently index/body-driven)
+$route['api/alumni/degrees']['post']               = 'AlumniProfile/add_degrees';
+$route['api/alumni/degrees']['put']                = 'AlumniProfile/update_degrees';
+$route['api/alumni/degrees']['delete']             = 'AlumniProfile/delete_degrees';
 
 // Certifications
-$route['api/add_certifications']              = 'AlumniProfile/add_certifications';
-$route['api/update_certifications']           = 'AlumniProfile/update_certifications';
-$route['api/delete_certifications']           = 'AlumniProfile/delete_certifications';
+$route['api/alumni/certifications']['post']        = 'AlumniProfile/add_certifications';
+$route['api/alumni/certifications']['put']         = 'AlumniProfile/update_certifications';
+$route['api/alumni/certifications']['delete']      = 'AlumniProfile/delete_certifications';
 
 // Licenses
-$route['api/add_licenses']                    = 'AlumniProfile/add_licenses';
-$route['api/update_licenses']                 = 'AlumniProfile/update_licenses';
-$route['api/delete_licenses']                 = 'AlumniProfile/delete_licenses';
+$route['api/alumni/licenses']['post']              = 'AlumniProfile/add_licenses';
+$route['api/alumni/licenses']['put']               = 'AlumniProfile/update_licenses';
+$route['api/alumni/licenses']['delete']            = 'AlumniProfile/delete_licenses';
 
 // Professional Courses
-$route['api/add_professional_courses']        = 'AlumniProfile/add_professional_courses';
-$route['api/update_professional_courses']     = 'AlumniProfile/update_professional_courses';
-$route['api/delete_professional_courses']     = 'AlumniProfile/delete_professional_courses';
+$route['api/alumni/professional_courses']['post']  = 'AlumniProfile/add_professional_courses';
+$route['api/alumni/professional_courses']['put']   = 'AlumniProfile/update_professional_courses';
+$route['api/alumni/professional_courses']['delete']= 'AlumniProfile/delete_professional_courses';
 
 // Employment History
-$route['api/add_employment_history']          = 'AlumniProfile/add_employment_history';
-$route['api/update_employment_history']       = 'AlumniProfile/update_employment_history';
-$route['api/delete_employment_history']       = 'AlumniProfile/delete_employment_history';
+$route['api/alumni/employment_history']['post']    = 'AlumniProfile/add_employment_history';
+$route['api/alumni/employment_history']['put']     = 'AlumniProfile/update_employment_history';
+$route['api/alumni/employment_history']['delete']  = 'AlumniProfile/delete_employment_history';
 
-$route['api/update_completion_status']        = 'AlumniProfile/update_completion_status';
+// Limits / results
+$route['api/alumni/monthly-limit-status']['get']   = 'SlotResult/monthly_limit_status';
 
-// Bidding System Routes
-$route['api/view_slots']                      = 'BiddingSystem/view_slots';
-$route['api/place_bid']                       = 'BiddingSystem/place_bid';
-$route['api/cancel_bid']                      = 'BiddingSystem/cancel_bid';
-$route['api/update_bid']                      = 'BiddingSystem/update_bid';
-$route['api/view_bid_status']                 = 'BiddingSystem/view_bid_status';
-$route['api/view_bidding_history']            = 'BiddingSystem/view_bidding_history';
-$route['api/view__status']       = 'BiddingSystem/view_monthly_limit_status';
+// -------------------------
+// /api/slots
+// -------------------------
+$route['api/slots']['get']                         = 'BiddingSystem/view_slots';
+// Slot winner result for a specific slot (preferred REST shape)
+$route['api/slots/result']['get']           = 'SlotResult/slot_result';
 
-// Slot Result Routes (winner prediction)
-$route['api/predict_winner']                  = 'SlotResult/predict_winner';    // POST – manual admin trigger
-$route['api/slot_result']                     = 'SlotResult/slot_result';        // GET  – any alumni
-$route['api/monthly_limit_status']            = 'SlotResult/monthly_limit_status'; // GET – any alumni
+// Admin-only trigger (kept, but made resource-ish)
+$route['api/slots/winner-prediction']['post']      = 'SlotResult/predict_winner';
 
-// View Winner Route
-$route['api/view_winner']                     = 'ViewWinner/view_winner'; // GET - any alumni
+// -------------------------
+// /api/bids
+// -------------------------
+$route['api/bids']['post']                         = 'BiddingSystem/place_bid';
+$route['api/bids/history']['get']                  = 'BiddingSystem/view_bidding_history';
 
-// ─── Automated Cron Job Route ──────────────────────────────────────────────
-// Called every day at 18:00 (6 PM) by the system cron job.
-// Protected by a shared secret key (?cron_key=CRON_SECRET_KEY_CHANGE_ME)
-// or executed via CLI using cron_winner.php.
-$route['api/cron/winner_selection']           = 'Cron/winner_selection';  // GET – cron only
+// Preferred REST shape (requires minor controller tweak to accept URI bid_id)
+$route['api/bids']['put']                   = 'BiddingSystem/update_bid';
+$route['api/bids']['delete']                       = 'BiddingSystem/cancel_bid';
+$route['api/bidsstatus']['get']            = 'BiddingSystem/view_bid_status';
+
+// -------------------------
+// /api/featured-alumni (COURSEWORK SPEC – must match exactly)
+// -------------------------
+$route['api/featured-alumni']['get']               = 'ViewWinner/view_winner';
+
+// -------------------------
+// /api/cron/*
+// -------------------------
+$route['api/cron/winner-selection']['get']         = 'Cron/winner_selection';
+$route['api/cron/winner-selection']['post']        = 'Cron/winner_selection';
+
+
+// -------------------------
+// /api/api-key-management/*
+// -------------------------
+$route['api/api-key-management/generate']['post']  = 'ApiKeyManager/generate_key';
+$route['api/api-key-management/list']['get']       = 'ApiKeyManager/list_keys';
+$route['api/api-key-management/revoke']['delete']   = 'ApiKeyManager/revoke_key';
+$route['api/api-key-management/stats']['get']      = 'ApiKeyManager/stats';
+$route['api/api-key-management/logs']['get']       = 'ApiKeyManager/logs';
+$route['api/api-key-management/docs']['get']       = 'ApiKeyManager/docs';
+$route['api/api-key-management/swagger']['get']    = 'ApiKeyManager/swagger_ui';
+

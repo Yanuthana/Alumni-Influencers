@@ -1,0 +1,1732 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Alumni Influencers API",
+        "description": "API documentation for the Alumni Influencers Bidding System",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost/Alumni-Influencers",
+            "description": "Local Development Server"
+        }
+    ],
+    "paths": {
+        "/api/alumni/profile": {
+            "get": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Get alumni profile",
+                "operationId": "cc5fbcbfa5b162056df05b6aef73a6c9",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Profile not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/profile/image": {
+            "put": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Update profile image",
+                "operationId": "328bdedb9fad771d211f8ffd9df7679d",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "profile_image_url": {
+                                        "type": "string",
+                                        "example": "http://example.com/image.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/profile/linkedin": {
+            "put": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Update LinkedIn URL",
+                "operationId": "f9fb8ad29ec5cd70fd34cc19a29506a1",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "linkedin_url": {
+                                        "type": "string",
+                                        "example": "https://linkedin.com/in/johndoe"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/degrees": {
+            "put": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Update degrees list (JSON)",
+                "operationId": "09bb17f8696f160ac4262ed92b005acf",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "degrees": {
+                                        "type": "string",
+                                        "example": "['BSc CS', 'MSc AI']"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Add a new degree",
+                "operationId": "bd1c8da99a6e355975dcdb63c6903ca0",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "degree": {
+                                        "type": "string",
+                                        "example": "BSc Computer Science"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Added"
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Delete a degree by index",
+                "operationId": "5e9c10a9648270b2445e7fb467961a0a",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "index": {
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "Invalid index"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/certifications": {
+            "put": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Update certifications list (JSON)",
+                "operationId": "14e3b806f1e9981a04a6277dc7bd5ae7",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "certifications": {
+                                        "type": "string",
+                                        "example": "['AWS Certified Developer', 'Google Cloud Engineer']"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Add a new certification",
+                "operationId": "6d25326c5f5918ee7f95bb09192e59c5",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "certification": {
+                                        "type": "string",
+                                        "example": "AWS Certified Developer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Added"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Delete a certification by index",
+                "operationId": "3ee0d3d2de69fddda91e89628981b8c0",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "index": {
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "Invalid index"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/licenses": {
+            "put": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Update licenses list (JSON)",
+                "operationId": "9785a6833bff7e00ec73618ce54565a8",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "licenses": {
+                                        "type": "string",
+                                        "example": "['License A', 'License B']"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Add a new license",
+                "operationId": "0f385c5c1198b09a35575bee6e167f31",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "licenses": {
+                                        "type": "string",
+                                        "example": "Driver License"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Added"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Delete a license by index",
+                "operationId": "57e91e73d8e4683a49147cffb13119c7",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "index": {
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "Invalid index"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/professional_courses": {
+            "put": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Update professional courses list (JSON)",
+                "operationId": "2184d74d735e24226ca2b39296cc454b",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "professional_courses": {
+                                        "type": "string",
+                                        "example": "['Course 1', 'Course 2']"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Add a new professional course",
+                "operationId": "82f63da971a45e182f88d6cd27aba0ec",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "course": {
+                                        "type": "string",
+                                        "example": "Advanced PHP"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Added"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Delete a professional course by index",
+                "operationId": "eda1bd0f6c815c9f22975208e9f0558f",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "index": {
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "Invalid index"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/employment_history": {
+            "put": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Update employment history (JSON)",
+                "operationId": "c52e84d3cd55c3b092435043bed75f42",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "employment_history": {
+                                        "type": "string",
+                                        "example": "['Job 1', 'Job 2']"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Add employment history entry",
+                "operationId": "89d3aae80d9635cab27434b0e83ea893",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "employment_data": {
+                                        "type": "string",
+                                        "example": "Software Engineer at Google"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Added"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Delete employment history entry by index",
+                "operationId": "507263464ceebcb5b66a0e4c8c5db110",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "index": {
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "Invalid index"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/profile/completion-status": {
+            "get": {
+                "tags": [
+                    "Alumni Profile"
+                ],
+                "summary": "Get profile completion status",
+                "operationId": "5d45b243aab82521d1cc0482890f6c11",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status returned"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "API Health Check",
+                "operationId": "4b248d09aca27ee32a8e7577a2f2bb25",
+                "responses": {
+                    "200": {
+                        "description": "API is running"
+                    }
+                },
+                "security": [
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/api-key-management/list": {
+            "get": {
+                "tags": [
+                    "API Key Management"
+                ],
+                "summary": "List API keys for a consumer",
+                "operationId": "267e7be6e514d979b2ba2cf13b120719",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of keys"
+                    },
+                    "404": {
+                        "description": "Consumer not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": [],
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/api-key-management/generate": {
+            "post": {
+                "tags": [
+                    "API Key Management"
+                ],
+                "summary": "Generate a new API key",
+                "operationId": "cfe005d2fe37c83d6a7656b9b903c990",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Key generated"
+                    },
+                    "400": {
+                        "description": "Failed to generate"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": [],
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/api-key-management/revoke": {
+            "delete": {
+                "tags": [
+                    "API Key Management"
+                ],
+                "summary": "Revoke API key",
+                "operationId": "f3d94d2688b283df193f2518a03b1ccf",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "key_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Key revoked"
+                    },
+                    "400": {
+                        "description": "Failed to revoke"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": [],
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/api-key-management/stats": {
+            "get": {
+                "tags": [
+                    "API Key Management"
+                ],
+                "summary": "View key statistics",
+                "operationId": "c26627faf23ff61943267858041c3670",
+                "responses": {
+                    "200": {
+                        "description": "Stats returned"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": [],
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/api-key-management/logs": {
+            "get": {
+                "tags": [
+                    "API Key Management"
+                ],
+                "summary": "View API logs",
+                "operationId": "c044d0f98c828529f4510da0bd9eada0",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logs returned"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": [],
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/api-key-management/swagger": {
+            "get": {
+                "tags": [
+                    "API Key Management"
+                ],
+                "summary": "Developer Swagger documentation viewer",
+                "operationId": "2185734efd1fc3efdd4921dd1b7f0361",
+                "responses": {
+                    "200": {
+                        "description": "HTML documentation viewer"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": [],
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "operationId": "78a3e75eee9c4948476ceb8109c27b77",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email",
+                                    "password",
+                                    "role",
+                                    "date_of_birth",
+                                    "phone_number"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@westminster.ac.uk"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "alumni",
+                                        "enum": [
+                                            "student",
+                                            "alumni",
+                                            "developer"
+                                        ]
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Registration successful"
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "403": {
+                        "description": "University email required"
+                    },
+                    "409": {
+                        "description": "Email already registered"
+                    }
+                }
+            }
+        },
+        "/api/auth/email/verify": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verify user email via token",
+                "operationId": "0b01a18e89ec88492c5118bd507550e9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "example": "abc123token"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email verified"
+                    },
+                    "404": {
+                        "description": "Invalid token"
+                    }
+                }
+            }
+        },
+        "/api/auth/sessions": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login and get JWT token",
+                "operationId": "2d57d4ba686824d815a9f076669ba881",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@westminster.ac.uk"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout and invalidate session",
+                "operationId": "a15d4fd16c20ec073125786f80f92c0c",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/password/forgot": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Request a password reset OTP",
+                "operationId": "be24d22d76117287a744cfa874d2b78b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@westminster.ac.uk"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent (if email exists)"
+                    }
+                }
+            }
+        },
+        "/api/auth/password/otp/verify": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verify OTP and get reset token",
+                "operationId": "e81a4a024b3c4669c3b33e23a401f0c1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@westminster.ac.uk"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified"
+                    },
+                    "400": {
+                        "description": "Invalid OTP"
+                    }
+                }
+            }
+        },
+        "/api/auth/password/reset": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset password using reset token",
+                "operationId": "fac2f0f93250fadd6055ed0e421d925c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reset_token",
+                                    "password",
+                                    "confirm_password"
+                                ],
+                                "properties": {
+                                    "reset_token": {
+                                        "type": "string",
+                                        "example": "xyz789reset"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newsecret123"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newsecret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successful"
+                    },
+                    "400": {
+                        "description": "Invalid input or token"
+                    }
+                }
+            }
+        },
+        "/api/slots": {
+            "get": {
+                "tags": [
+                    "Bidding System"
+                ],
+                "summary": "View available bidding slots",
+                "operationId": "ccd8b255681ea257085c2b1a7ca3cde3",
+                "responses": {
+                    "200": {
+                        "description": "List of slots"
+                    },
+                    "500": {
+                        "description": "Error fetching slots"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/bids": {
+            "put": {
+                "tags": [
+                    "Bidding System"
+                ],
+                "summary": "Update a bid amount",
+                "operationId": "43305d75816e328d66f40d1615966217",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bid_id",
+                                    "bid_amount"
+                                ],
+                                "properties": {
+                                    "bid_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "bid_amount": {
+                                        "type": "number",
+                                        "example": 60
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bid updated"
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Bidding System"
+                ],
+                "summary": "Place a new bid",
+                "operationId": "f8f5bf0cb80e55972352a0da720f1c7e",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "slot_id",
+                                    "bid_amount"
+                                ],
+                                "properties": {
+                                    "slot_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "bid_amount": {
+                                        "type": "number",
+                                        "example": 50
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bid placed"
+                    },
+                    "400": {
+                        "description": "Invalid input or bid rejected"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Bidding System"
+                ],
+                "summary": "Cancel a bid",
+                "operationId": "4ce90bf9b0069eddd88a7613071395e4",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bid_id"
+                                ],
+                                "properties": {
+                                    "bid_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bid canceled"
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/bidsstatus": {
+            "get": {
+                "tags": [
+                    "Bidding System"
+                ],
+                "summary": "Get specific bid status",
+                "operationId": "a93e21d10c89deaf6a95ed91bfc345df",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bid_id"
+                                ],
+                                "properties": {
+                                    "bid_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status returned"
+                    },
+                    "400": {
+                        "description": "Invalid bid_id"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/bids/history": {
+            "get": {
+                "tags": [
+                    "Bidding System"
+                ],
+                "summary": "View alumni bidding history",
+                "operationId": "8753d20f7462f948aa93a610627f1648",
+                "responses": {
+                    "200": {
+                        "description": "History returned"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cron/winner_selection": {
+            "get": {
+                "tags": [
+                    "Cron Jobs"
+                ],
+                "summary": "Select winner for today's slot",
+                "operationId": "86babc3b6f3eb39dd6877023cba1aac9",
+                "parameters": [
+                    {
+                        "name": "cron_key",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Executed"
+                    },
+                    "403": {
+                        "description": "Invalid cron key"
+                    }
+                }
+            }
+        },
+        "/api/slots/result": {
+            "get": {
+                "tags": [
+                    "Slot Result"
+                ],
+                "summary": "View winner details for a specific slot",
+                "operationId": "9b6a8b26c06598bcfa9c4a49c3cd7229",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "slot_id"
+                                ],
+                                "properties": {
+                                    "slot_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Winner details"
+                    },
+                    "404": {
+                        "description": "No winner found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/alumni/monthly-limit-status": {
+            "get": {
+                "tags": [
+                    "Slot Result"
+                ],
+                "summary": "Get monthly win limit status",
+                "operationId": "d1c660c13f2ad1ee6ed7fa9c31644289",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status returned"
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/featured-alumni": {
+            "get": {
+                "tags": [
+                    "Featured Alumni"
+                ],
+                "summary": "View the daily featured alumni",
+                "operationId": "e02a2076dcc8e593adeabcd1a88dea8c",
+                "parameters": [
+                    {
+                        "name": "slot_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Winner found"
+                    },
+                    "404": {
+                        "description": "No winner for this slot"
+                    }
+                },
+                "security": [
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            },
+            "apiKeyAuth": {
+                "type": "apiKey",
+                "name": "apikey",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Alumni Profile",
+            "description": "Endpoints for managing alumni profiles"
+        },
+        {
+            "name": "System",
+            "description": "API health and gateway integration"
+        },
+        {
+            "name": "API Key Management",
+            "description": "Endpoints for managing API keys and viewing usage stats"
+        },
+        {
+            "name": "Bidding System",
+            "description": "Endpoints for slot bidding"
+        },
+        {
+            "name": "Cron Jobs",
+            "description": "Automated scheduled tasks"
+        },
+        {
+            "name": "Slot Result",
+            "description": "Endpoints for slot results and win limits"
+        },
+        {
+            "name": "Featured Alumni",
+            "description": "Endpoints for viewing daily winners"
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        }
+    ]
+}

@@ -153,4 +153,5 @@ $route['api/api-key-management/revoke']['delete']   = 'ApiKeyManager/revoke_key'
 $route['api/api-key-management/stats']['get']      = 'ApiKeyManager/stats';
 $route['api/api-key-management/logs']['get']       = 'ApiKeyManager/logs';
 $route['api/api-key-management/docs']['get']       = 'ApiKeyManager/docs';
+$route['api/api-key-management/swagger']['get']    = 'ApiKeyManager/swagger_ui';
 

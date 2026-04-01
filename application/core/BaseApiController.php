@@ -2,23 +2,9 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use OpenApi\Annotations as OA;
 
 /**
- * @OA\Info(
- *     title="Alumni Influencers API",
- *     version="1.0.0",
- *     description="API documentation for the Alumni Influencers platform"
- * )
- * @OA\Server(
- *     url="http://localhost/Alumni-Influencers",
- *     description="Local Development Server"
- * )
- * @OA\SecurityScheme(
- *     securityScheme="bearerAuth",
- *     type="http",
- *     scheme="bearer",
- *     bearerFormat="JWT"
- * )
  * @property CI_Input  $input
  * @property CI_Output $output
  * @property CI_Loader $load
@@ -28,12 +14,13 @@ use Firebase\JWT\Key;
  */
 class BaseApiController extends CI_Controller
 {
-    protected const JWT_KEY = 'SUPER_SECRET_KEY_12345_CHANGE_ME_IN_PRODUCTION';
+    protected $JWT_KEY;
 
     public function __construct()
     {
         parent::__construct();
         $this->load->model('Api_log_model', 'api_logs');
+        $this->JWT_KEY = $_ENV['JWT_KEY'] ?? getenv('JWT_KEY') ?: null;
     }
 
 
@@ -140,10 +127,11 @@ class BaseApiController extends CI_Controller
         $token = $this->_bearer_token();
         if (!$token) {
             $this->_respond(401, ['status' => 'error', 'message' => 'Bearer token is required']);
+            return;
         }
 
         try {
-            $decoded = JWT::decode($token, new Key(self::JWT_KEY, 'HS256'));
+            $decoded = JWT::decode($token, new Key($this->JWT_KEY, 'HS256'));
             $user = (array) $decoded;
         } catch (Exception $e) {
             $this->_respond(401, ['status' => 'error', 'message' => 'Invalid or expired token: ' . $e->getMessage()]);

@@ -2,38 +2,31 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-// Define CI3 constants to prevent "No direct script access allowed" errors
+use OpenApi\Annotations as OA;
+
+// Define CI3 constants
 if (!defined('BASEPATH')) define('BASEPATH', __DIR__ . '/system/');
 if (!defined('APPPATH')) define('APPPATH', __DIR__ . '/application/');
 if (!defined('ENVIRONMENT')) define('ENVIRONMENT', 'development');
 
-// Pre-load the base controller so the generator can resolve sub-classes
-require_once APPPATH . 'core/BaseApiController.php';
+// Mock CodeIgniter core classes so we can include controllers without errors
+if (!class_exists('CI_Controller')) {
+    class CI_Controller {
+        public function __construct() {}
+        public function __get($key) { return null; }
+    }
+}
 
-/**
- * @OA\Info(
- *     title="Alumni Influencers API",
- *     version="1.0.0",
- *     description="API documentation for the Alumni Influencers platform"
- * )
- * @OA\Server(
- *     url="http://localhost/Alumni-Influencers",
- *     description="Local Development Server"
- * )
- * @OA\SecurityScheme(
- *     securityScheme="bearerAuth",
- *     type="http",
- *     scheme="bearer",
- *     bearerFormat="JWT"
- * )
- */
+// Manually include core files and controllers to satisfy ReflectionAnalyser
+require_once APPPATH . 'core/BaseApiController.php';
+foreach (glob(APPPATH . 'controllers/*.php') as $file) {
+    require_once $file;
+}
 
 $openapi = (new \OpenApi\Generator())->generate([
-    __DIR__ . '/application/controllers',
-    __DIR__ . '/application/core',
-    __FILE__ 
+    APPPATH . 'controllers',
+    APPPATH . 'core'
 ]);
 
 file_put_contents(__DIR__ . '/swagger.json', $openapi->toJson());
-
-echo "Swagger JSON generated successfully!";
+echo "Swagger JSON generated successfully!\n";

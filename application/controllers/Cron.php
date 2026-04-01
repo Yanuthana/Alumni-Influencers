@@ -14,15 +14,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * Or via PHP CLI (no web server needed):
  *   0 18 * * * /Applications/XAMPP/xamppfiles/bin/php /Applications/XAMPP/xamppfiles/htdocs/Alumni-Influencers/cron_winner.php >> /tmp/alumni_cron.log 2>&1
  *
-/**
  * @OA\Tag(
  *     name="Cron Jobs",
  *     description="Automated scheduled tasks"
  * )
- * @property CI_Input      $input
- * @property CI_Output     $output
- * @property CI_Loader     $load
  * @property SlotResult_model $slotresult_model
+ * @property Bidding_model    $bidding_model
  */
 class Cron extends CI_Controller {
 
@@ -30,11 +27,13 @@ class Cron extends CI_Controller {
      * Must match the cron_key query parameter sent by the cron job.
      * Change this in production! Store in a config file ideally.
      */
-    private const CRON_SECRET = 'CRON_SECRET_KEY_CHANGE_ME';
+    private $CRON_SECRET;
 
     public function __construct() {
         parent::__construct();
+        $this->CRON_SECRET = getenv('CRON_SECRET');
         $this->load->model('slotresult_model');
+        $this->load->model('bidding_model');
     }
 
     // ---------------------------------------------------------------
@@ -65,27 +64,42 @@ class Cron extends CI_Controller {
         // When called from CLI via cron_winner.php the key is injected via argv
         if (php_sapi_name() === 'cli') {
             // CLI execution is inherently trusted; skip key check
-        } elseif ($key !== self::CRON_SECRET) {
+        } elseif ($key !== $this->CRON_SECRET) {
             http_response_code(403);
             echo json_encode(['status' => 'error', 'message' => 'Forbidden: invalid cron key']);
             exit;
         }
 
         $timestamp = date('Y-m-d H:i:s');
-        $result    = $this->slotresult_model->predict_winner();
+        
+        // 1) Predict winner for TODAY'S slot (ending at 18:00)
+        $winnerResult = $this->slotresult_model->predict_winner();
+
+        // 2) Automate Slot Creation for FUTURE slots
+        // We ensure slots for the next 7 days exist to be safe and give alumni time to bid.
+        $slotsCreated = [];
+        for ($i = 0; $i <= 7; $i++) {
+            $futureDate = date('Y-m-d', strtotime("+$i days"));
+            $this->bidding_model->ensure_slot_exists($futureDate);
+            $slotsCreated[] = $futureDate;
+        }
 
         $response = [
             'executed_at' => $timestamp,
-            'status'      => $result['status'] ? 'success' : 'error',
-            'message'     => $result['message'],
+            'winner_selection' => [
+                'status'  => $winnerResult['status'] ? 'success' : 'error',
+                'message' => $winnerResult['message'],
+                'data'    => $winnerResult['data'] ?? null
+            ],
+            'slot_automation' => [
+                'status'  => 'success',
+                'message' => 'Verified/Created slots for the next 7 days',
+                'dates'   => $slotsCreated
+            ]
         ];
 
-        if (!empty($result['data'])) {
-            $response['data'] = $result['data'];
-        }
-
         $this->output
-            ->set_status_header($result['status'] ? 200 : 400)
+            ->set_status_header(200)
             ->set_content_type('application/json', 'utf-8')
             ->set_output(json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         $this->output->_display();

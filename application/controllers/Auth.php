@@ -2,10 +2,10 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH . 'core/BaseApiController.php';
+use OpenApi\Annotations as OA;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use OpenApi\Annotations as OA;
 
 /**
  * @OA\Info(
@@ -42,11 +42,6 @@ class Auth extends BaseApiController
         $this->load->model('User_model', 'users');
     }
 
-    // =================================================================
-    // POST /api/auth/register
-    // Body: { first_name, last_name, email, password, role,
-    //         date_of_birth, phone_number }
-    // =================================================================
     /**
      * @OA\Post(
      *     path="/api/auth/register",
@@ -75,7 +70,6 @@ class Auth extends BaseApiController
     {
         $d = $this->_json_body();
 
-        // --- Required field validation ---
         $required = [
             'first_name',
             'last_name',
@@ -108,7 +102,7 @@ class Auth extends BaseApiController
             ]);
         }
 
-        // --- University Email Domain Check (Alumni/Student only) ---
+        // University Email Domain Check (Alumni and Student only) 
         if ($d['role'] === 'alumni' || $d['role'] === 'student') {
             $allowed_domains = ['@westminster.ac.uk', '@my.westminster.ac.uk'];
             $is_valid_domain = false;
@@ -134,7 +128,6 @@ class Auth extends BaseApiController
             ]);
         }
 
-        // --- Duplicate email check ---
         if ($this->users->find_by_email($d['email'])) {
             $this->_respond(409, [
                 'status'  => 'error',
@@ -142,7 +135,6 @@ class Auth extends BaseApiController
             ]);
         }
 
-        // --- Build user data ---
         $token     = bin2hex(random_bytes(16));
         $user_data = [
             'first_name'         => $d['first_name'],
@@ -164,8 +156,6 @@ class Auth extends BaseApiController
                 'profile_completion_status' => 'pending'
             ];
         }
-
-        // --- Persist ---
         $user_id = $this->users->register($user_data, $role_data, $d['role']);
         if (!$user_id) {
             $this->_respond(500, [
@@ -198,10 +188,22 @@ class Auth extends BaseApiController
         ]);
     }
 
-    // =================================================================
-    // POST /api/auth/email/verify
-    // Body: { token }
-    // =================================================================
+    /**
+     * @OA\Post(
+     *     path="/api/auth/email/verify",
+     *     summary="Verify user email via token",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"token"},
+     *             @OA\Property(property="token", type="string", example="abc123token")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Email verified"),
+     *     @OA\Response(response=404, description="Invalid token")
+     * )
+     */
     public function verify_email(): void
     {
         $d     = $this->_json_body();
@@ -291,7 +293,7 @@ class Auth extends BaseApiController
             'exp'        => $expires_at
         ];
 
-        $api_token = JWT::encode($payload, self::JWT_KEY, 'HS256');
+        $api_token = JWT::encode($payload, $this->JWT_KEY, 'HS256');
 
         $this->_respond(200, [
             'status'  => 'success',
@@ -311,6 +313,16 @@ class Auth extends BaseApiController
     // DELETE /api/auth/sessions
     // Header: Authorization: Bearer <api_token>
     // =================================================================
+    /**
+     * @OA\Delete(
+     *     path="/api/auth/sessions",
+     *     summary="Logout and invalidate session",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Logged out successfully"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function logout(): void
     {
         $token = $this->_bearer_token();
@@ -322,7 +334,7 @@ class Auth extends BaseApiController
         }
 
         try {
-            JWT::decode($token, new Key(self::JWT_KEY, 'HS256'));
+            JWT::decode($token, new Key($this->JWT_KEY, 'HS256'));
         } catch (Exception $e) {
             $this->_respond(401, [
                 'status'  => 'error',
@@ -341,6 +353,21 @@ class Auth extends BaseApiController
     // POST /api/auth/password/forgot
     // Body: { email }
     // =================================================================
+    /**
+     * @OA\Post(
+     *     path="/api/auth/password/forgot",
+     *     summary="Request a password reset OTP",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email", example="john@westminster.ac.uk")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP sent (if email exists)")
+     * )
+     */
     public function forgot_password(): void
     {
         $d     = $this->_json_body();
@@ -398,11 +425,24 @@ class Auth extends BaseApiController
         ]);
     }
 
-    // =================================================================
-    // POST /api/auth/password/otp/verify
-    // Body: { email, otp }
-    // Response includes: reset_token — client must use this in /api/reset-password
-    // =================================================================
+  
+    /**
+     * @OA\Post(
+     *     path="/api/auth/password/otp/verify",
+     *     summary="Verify OTP and get reset token",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email", "otp"},
+     *             @OA\Property(property="email", type="string", format="email", example="john@westminster.ac.uk"),
+     *             @OA\Property(property="otp", type="string", example="123456")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP verified"),
+     *     @OA\Response(response=400, description="Invalid OTP")
+     * )
+     */
     public function verify_otp(): void
     {
         $d     = $this->_json_body();
@@ -443,6 +483,24 @@ class Auth extends BaseApiController
     // POST /api/auth/password/reset
     // Body: { reset_token, password, confirm_password }
     // =================================================================
+    /**
+     * @OA\Post(
+     *     path="/api/auth/password/reset",
+     *     summary="Reset password using reset token",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"reset_token", "password", "confirm_password"},
+     *             @OA\Property(property="reset_token", type="string", example="xyz789reset"),
+     *             @OA\Property(property="password", type="string", format="password", example="newsecret123"),
+     *             @OA\Property(property="confirm_password", type="string", format="password", example="newsecret123")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Password reset successful"),
+     *     @OA\Response(response=400, description="Invalid input or token")
+     * )
+     */
     public function reset_password(): void
     {
         $d           = $this->_json_body();
@@ -489,14 +547,4 @@ class Auth extends BaseApiController
         ]);
     }
 
-    // =================================================================
-    // GET / (Default Route)
-    // =================================================================
-    public function index(): void
-    {
-        $this->_respond(200, [
-            'status'  => 'success',
-            'message' => 'Alumni Influencers API is running.'
-        ]);
-    }
 }

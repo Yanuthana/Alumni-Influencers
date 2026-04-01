@@ -2,6 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH . 'core/BaseApiController.php';
+use OpenApi\Annotations as OA;
 
 /**
  * @OA\Tag(
@@ -29,27 +30,5 @@ class Api extends BaseApiController
         ]);
     }
 
-    public function logs()
-    {
-        $this->_require_api_key();
-
-        // Get JSON from Kong
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if(!$data) {
-            echo json_encode(['status'=>'error','message'=>'No data received']);
-            return;
-        }
-
-        $log = [
-            'client_id'  => $data['consumer']['username'] ?? 'unknown',
-            'endpoint'   => $data['request']['uri'] ?? '',
-            'status'     => $data['response']['status'] ?? 0,
-            'ip_address' => $data['client_ip'] ?? '',
-        ];
-
-        $this->db->insert('api_logs', $log);
-        echo json_encode(['status'=>'success','message'=>'Log saved']);
-    }
 }
 

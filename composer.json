@@ -13,7 +13,9 @@
 	"require": {
 		"php": ">=5.3.7",
 		"firebase/php-jwt": "*",
-		"zircote/swagger-php": "*"
+		"zircote/swagger-php": "*",
+		"doctrine/annotations": "*",
+		"vlucas/phpdotenv": "*"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"

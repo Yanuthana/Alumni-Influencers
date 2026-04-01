@@ -2,6 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH . 'core/BaseApiController.php';
+use OpenApi\Annotations as OA;
 
 /**
  * @OA\Tag(
@@ -15,11 +16,13 @@ class ApiKeyManager extends BaseApiController
     /**
      * Kong Admin API Base URL
      */
-    private $kong_admin_url = 'http://127.0.0.1:8001';
+    private $kong_admin_url;
 
     public function __construct()
     {
         parent::__construct();
+        // Use environment variable, fallback to hardcoded if not set
+        $this->kong_admin_url = getenv('KONG_ADMIN_URL');
         $this->load->model('Api_log_model', 'api_logs');
     }
 
@@ -102,6 +105,18 @@ class ApiKeyManager extends BaseApiController
      * Revoke API Key
      * DELETE /api/api-key-management/revoke?username=developer1&key_id=<key-id>
      */
+    /**
+ * @OA\Delete(
+ *     path="/api/api-key-management/revoke",
+ *     summary="Revoke API key",
+ *     tags={"API Key Management"},
+ *     security={{"bearerAuth": {}, "apiKeyAuth": {}}},
+ *     @OA\Parameter(name="username", in="query", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="key_id", in="query", required=true, @OA\Schema(type="string")),
+ *     @OA\Response(response=200, description="Key revoked"),
+ *     @OA\Response(response=400, description="Failed to revoke")
+ * )
+ */
     public function revoke_key()
     {
         $this->_require_api_key();
@@ -141,6 +156,15 @@ class ApiKeyManager extends BaseApiController
      * View Key Statistics
      * GET /api/api-key-management/stats
      */
+    /**
+ * @OA\Get(
+ *     path="/api/api-key-management/stats",
+ *     summary="View key statistics",
+ *     tags={"API Key Management"},
+ *     security={{"bearerAuth": {}, "apiKeyAuth": {}}},
+ *     @OA\Response(response=200, description="Stats returned")
+ * )
+ */
     public function stats()
     {
         $this->_require_api_key();
@@ -157,6 +181,17 @@ class ApiKeyManager extends BaseApiController
      * View Full API Logs
      * GET /api/api-key-management/logs
      */
+    /**
+ * @OA\Get(
+ *     path="/api/api-key-management/logs",
+ *     summary="View API logs",
+ *     tags={"API Key Management"},
+ *     security={{"bearerAuth": {}, "apiKeyAuth": {}}},
+ *     @OA\Parameter(name="limit", in="query", required=false, @OA\Schema(type="integer")),
+ *     @OA\Parameter(name="offset", in="query", required=false, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Logs returned")
+ * )
+ */
     public function logs()
     {
         $this->_require_api_key();
@@ -173,59 +208,34 @@ class ApiKeyManager extends BaseApiController
         ]);
     }
 
+
     /**
-     * Access API Documentation
-     * GET /api/api-key-management/docs
+     * @OA\Get(
+     *     path="/api/api-key-management/swagger",
+     *     summary="Developer Swagger documentation viewer",
+     *     tags={"API Key Management"},
+     *     security={{"bearerAuth": {}, "apiKeyAuth": {}}},
+     *     @OA\Response(response=200, description="HTML documentation viewer")
+     * )
      */
-    public function docs()
+    public function swagger_ui()
     {
         $this->_require_api_key();
         $this->_require_role(['developer']);
-        $docs = [
-            'project'     => 'Alumni Influencers API',
-            'auth_method' => 'API Key Authentication',
-            'how_to_use'  => 'Pass your API Key in the "apikey" header for every request.',
-            'header_example' => [
-                'apikey' => 'your_generated_key_here'
-            ],
-            'curl_example' => 'curl -H "apikey: your_key" ' . base_url('api/alumni/profile'),
-            'endpoints' => [
-                [
-                    'endpoint'    => 'api/alumni/profile',
-                    'method'      => 'GET',
-                    'description' => 'Retrieve the logged-in alumni profile details.'
-                ],
-                [
-                    'endpoint'    => 'api/slots',
-                    'method'      => 'GET',
-                    'description' => 'List all available bidding slots.'
-                ],
-                [
-                    'endpoint'    => 'api/bids',
-                    'method'      => 'POST',
-                    'description' => 'Place a new bid on a slot.'
-                ],
-                [
-                    'endpoint'    => 'api/featured-alumni',
-                    'method'      => 'GET',
-                    'description' => 'Get the current daily featured alumni.'
-                ]
-            ],
-            'view_stats'  => base_url('api/api-key-management/stats'),
-            'view_logs'   => base_url('api/api-key-management/logs'),
-            'key_operations' => [
-                'generate_key' => 'POST ' . base_url('api/api-key-management/generate?username=<your_username>'),
-                'list_keys'    => base_url('api/api-key-management/list?username=<your_username>'),
-                'revoke_key'   => 'DELETE ' . base_url('api/api-key-management/revoke?username=<your_username>&key_id=<key_id>'),
-                'view_stats'   => base_url('api/api-key-management/stats'),
-                'view_logs'    => base_url('api/api-key-management/logs')
-            ]
-        ];
-
-        $this->_respond(200, [
-            'status' => 'success',
-            'data'   => $docs
-        ]);
+        
+        $path = FCPATH . 'swagger-ui/index.html';
+        if (!file_exists($path)) {
+            $this->_respond(404, ['status' => 'error', 'message' => 'Swagger UI index file not found']);
+        }
+        
+        $html = file_get_contents($path);
+        
+        $json_url = base_url('swagger.json');
+        $html = str_replace('http://localhost/Alumni-Influencers/swagger.json', $json_url, $html);
+        
+        $this->output
+            ->set_content_type('text/html')
+            ->set_output($html);
     }
 
     /**

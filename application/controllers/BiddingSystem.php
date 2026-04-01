@@ -3,6 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 
 require_once APPPATH . 'core/BaseApiController.php';
+use OpenApi\Annotations as OA;
 
 /**
  * @OA\Tag(
@@ -117,6 +118,22 @@ class BiddingSystem extends BaseApiController
     }
 
 
+    /**
+ * @OA\Delete(
+ *     path="/api/bids",
+ *     summary="Cancel a bid",
+ *     tags={"Bidding System"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             required={"bid_id"},
+ *             @OA\Property(property="bid_id", type="integer", example=1)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Bid canceled"),
+ *     @OA\Response(response=400, description="Invalid input")
+ * )
+ */
     public function cancel_bid()
     {
         $d = $this->_json_body();
@@ -148,6 +165,23 @@ class BiddingSystem extends BaseApiController
         }
     }
 
+    /**
+ * @OA\Put(
+ *     path="/api/bids",
+ *     summary="Update a bid amount",
+ *     tags={"Bidding System"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             required={"bid_id", "bid_amount"},
+ *             @OA\Property(property="bid_id", type="integer", example=1),
+ *             @OA\Property(property="bid_amount", type="number", example=60.0)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Bid updated"),
+ *     @OA\Response(response=400, description="Invalid input")
+ * )
+ */
     public function update_bid()
     {
 
@@ -181,6 +215,22 @@ class BiddingSystem extends BaseApiController
         }
     }
 
+    /**
+ * @OA\Get(
+ *     path="/api/bidsstatus",
+ *     summary="Get specific bid status",
+ *     tags={"Bidding System"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             required={"bid_id"},
+ *             @OA\Property(property="bid_id", type="integer", example=1)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Status returned"),
+ *     @OA\Response(response=400, description="Invalid bid_id")
+ * )
+ */
     public function view_bid_status()
     {
         $d = $this->_json_body();
@@ -213,6 +263,15 @@ class BiddingSystem extends BaseApiController
         }
     }
 
+    /**
+ * @OA\Get(
+ *     path="/api/bids/history",
+ *     summary="View alumni bidding history",
+ *     tags={"Bidding System"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Response(response=200, description="History returned")
+ * )
+ */
     public function view_bidding_history()
     {
         $userId = $this->_get_user_id();

@@ -14,11 +14,6 @@ require_once APPPATH . 'core/BaseApiController.php';
  */
 class  ViewWinner extends BaseApiController
 {
-    /**
-     * Optional fallback key for non-Kong access in production.
-     * Use query param: ?gateway_key=...
-     */
-    private const FEATURED_ALUMNI_GATEWAY_KEY = 'FEATURED_ALUMNI_GATEWAY_KEY_CHANGE_ME';
 
     public function __construct()
     {
@@ -37,20 +32,6 @@ class  ViewWinner extends BaseApiController
         return $header === '' ? null : $this->security->xss_clean($header);
     }
 
-    private function _get_consumer_identity(): ?string
-    {
-        $consumerUsername = $this->_kong_header('X-Consumer-Username');
-        if (!empty($consumerUsername)) {
-            return $consumerUsername;
-        }
-
-        $consumerId = $this->_kong_header('X-Consumer-ID');
-        if (!empty($consumerId)) {
-            return $consumerId;
-        }
-
-        return null;
-    }
 
     private function _is_from_kong(): bool
     {
@@ -67,17 +48,17 @@ class  ViewWinner extends BaseApiController
         return !empty($this->_kong_header('X-Consumer-Username')) || !empty($this->_kong_header('X-Consumer-ID'));
     }
 
-    private function _allow_non_kong_request(): bool
-    {
-        // Local/dev/test should not be blocked when Kong is absent.
-        if (defined('ENVIRONMENT') && ENVIRONMENT !== 'production') {
-            return true;
-        }
+    // private function _allow_non_kong_request(): bool
+    // {
+    //     // Local/dev/test should not be blocked when Kong is absent.
+    //     if (defined('ENVIRONMENT') && ENVIRONMENT !== 'production') {
+    //         return true;
+    //     }
 
-        // Optional production fallback with shared key (if needed temporarily).
-        $gatewayKey = (string) $this->input->get('gateway_key', true);
-        return $gatewayKey !== '' && hash_equals(self::FEATURED_ALUMNI_GATEWAY_KEY, $gatewayKey);
-    }
+    //     // Optional production fallback with shared key (if needed temporarily).
+    //     $gatewayKey = (string) $this->input->get('gateway_key', true);
+    //     return $gatewayKey !== '' && hash_equals(self::FEATURED_ALUMNI_GATEWAY_KEY, $gatewayKey);
+    // }
 
 
     /**
@@ -91,40 +72,80 @@ class  ViewWinner extends BaseApiController
      *     @OA\Response(response=404, description="No winner for this slot")
      * )
      */
+    // public function view_winner()
+    // {
+    //     $this->_require_api_key();
+
+    //     if (!$this->_is_from_kong() && !$this->_allow_non_kong_request()) {
+    //         $this->_respond(403, [
+    //             'status'  => 'error',
+    //             'message' => 'Forbidden: request must pass through Kong gateway (or provide valid gateway_key outside Kong)',
+    //         ]);
+    //     }
+
+    //     $slotIdRaw = $this->input->get('slot_id', true);
+    //     $slotId = filter_var($slotIdRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+    //     if ($slotId === false) {
+    //         $this->_respond(400, [
+    //             'status'  => 'error',
+    //             'message' => 'slot_id query parameter is required and must be a positive integer',
+    //         ]);
+    //     }
+
+    //     $result = $this->slotresult_model->view_winner($slotId);
+
+    //     if ($result['status']) {
+    //         $this->_respond(200, [
+    //             'status'  => 'success',
+    //             'message' => $result['message'],
+    //             'data'    => $result['data'],
+    //         ]);
+    //     } else {
+    //         $this->_respond(404, [
+    //             'status'  => 'error',
+    //             'message' => $result['message'],
+    //         ]);
+    //     }
+    // }
+
+
     public function view_winner()
-    {
-        $this->_require_api_key();
+{
+    $this->_require_api_key();
 
-        if (!$this->_is_from_kong() && !$this->_allow_non_kong_request()) {
-            $this->_respond(403, [
-                'status'  => 'error',
-                'message' => 'Forbidden: request must pass through Kong gateway (or provide valid gateway_key outside Kong)',
-            ]);
-        }
-
-        $slotIdRaw = $this->input->get('slot_id', true);
-        $slotId = filter_var($slotIdRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-
-        if ($slotId === false) {
-            $this->_respond(400, [
-                'status'  => 'error',
-                'message' => 'slot_id query parameter is required and must be a positive integer',
-            ]);
-        }
-
-        $result = $this->slotresult_model->view_winner($slotId);
-
-        if ($result['status']) {
-            $this->_respond(200, [
-                'status'  => 'success',
-                'message' => $result['message'],
-                'data'    => $result['data'],
-            ]);
-        } else {
-            $this->_respond(404, [
-                'status'  => 'error',
-                'message' => $result['message'],
-            ]);
-        }
+    if (!$this->_is_from_kong()) {
+        $this->_respond(403, [
+            'status'  => 'error',
+            'message' => 'Forbidden: request must pass through Kong gateway',
+        ]);
+        return;
     }
+
+    $slotIdRaw = $this->input->get('slot_id', true);
+    $slotId = filter_var($slotIdRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+    if ($slotId === false) {
+        $this->_respond(400, [
+            'status'  => 'error',
+            'message' => 'slot_id must be a positive integer',
+        ]);
+        return;
+    }
+
+    $result = $this->slotresult_model->view_winner($slotId);
+
+    if ($result['status']) {
+        $this->_respond(200, [
+            'status'  => 'success',
+            'message' => $result['message'],
+            'data'    => $result['data'],
+        ]);
+    } else {
+        $this->_respond(404, [
+            'status'  => 'error',
+            'message' => $result['message'],
+        ]);
+    }
+}
 }

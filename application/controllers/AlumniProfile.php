@@ -4,8 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH . 'core/BaseApiController.php';
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use OpenApi\Annotations as OA;
 
 /**
  * @OA\Tag(
@@ -95,6 +94,22 @@ class AlumniProfile extends BaseApiController{
     
     }
 
+    /**
+ * @OA\Put(
+ *     path="/api/alumni/profile/linkedin",
+ *     summary="Update LinkedIn URL",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="linkedin_url", type="string", example="https://linkedin.com/in/johndoe")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Updated"),
+ *     @OA\Response(response=400, description="Invalid input")
+ * )
+ */
     public function update_linkedin_url()
     {
         $user_id = $this->_get_user_id();
@@ -112,6 +127,22 @@ class AlumniProfile extends BaseApiController{
     
     }
 
+    /**
+ * @OA\Post(
+ *     path="/api/alumni/degrees",
+ *     summary="Add a new degree",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="degree", type="string", example="BSc Computer Science")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Added"),
+ *     @OA\Response(response=400, description="Invalid input")
+ * )
+ */
     public function add_degrees(){
         $user_id = $this->_get_user_id();
         $d= $this->_json_body();
@@ -129,6 +160,21 @@ class AlumniProfile extends BaseApiController{
     }
 
 
+    /**
+ * @OA\Put(
+ *     path="/api/alumni/degrees",
+ *     summary="Update degrees list (JSON)",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="degrees", type="string", example="['BSc CS', 'MSc AI']")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Updated")
+ * )
+ */
     public function update_degrees()
     {
         $user_id = $this->_get_user_id();
@@ -146,6 +192,22 @@ class AlumniProfile extends BaseApiController{
     
     }
 
+    /**
+ * @OA\Delete(
+ *     path="/api/alumni/degrees",
+ *     summary="Delete a degree by index",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="index", type="integer", example=0)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Deleted"),
+ *     @OA\Response(response=400, description="Invalid index")
+ * )
+ */
     public function delete_degrees(){
         $user_id = $this->_get_user_id();
         $d = $this->_json_body();
@@ -164,6 +226,21 @@ class AlumniProfile extends BaseApiController{
             return $this->_respond(500, ['status' => 'error', 'message' => 'Failed to delete degree']);
         }
     }
+    /**
+ * @OA\Post(
+ *     path="/api/alumni/certifications",
+ *     summary="Add a new certification",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="certification", type="string", example="AWS Certified Developer")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Added")
+ * )
+ */
     public function add_certifications()
     {
         $user_id = $this->_get_user_id();
@@ -180,6 +257,21 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200, ['status' => 'success', 'data' => $profile]);
     }
 
+    /**
+ * @OA\Put(
+ *     path="/api/alumni/certifications",
+ *     summary="Update certifications list (JSON)",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="certifications", type="string", example="['AWS Certified Developer', 'Google Cloud Engineer']")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Updated")
+ * )
+ */
     public function update_certifications()
     {
         $user_id = $this->_get_user_id();
@@ -196,6 +288,22 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200, ['status' => 'success', 'data' => $profile]);
     }
 
+    /**
+ * @OA\Delete(
+ *     path="/api/alumni/certifications",
+ *     summary="Delete a certification by index",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="index", type="integer", example=0)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Deleted"),
+ *     @OA\Response(response=400, description="Invalid index")
+ * )
+ */
     public function delete_certifications()
     {
         $user_id = $this->_get_user_id();
@@ -216,6 +324,21 @@ class AlumniProfile extends BaseApiController{
         }
     }
 
+    /**
+ * @OA\Post(
+ *     path="/api/alumni/licenses",
+ *     summary="Add a new license",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="licenses", type="string", example="Driver License")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Added")
+ * )
+ */
     public function add_licenses()      
     {
         $user_id = $this->_get_user_id();
@@ -232,6 +355,21 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200, ['status' => 'success', 'data' => $profile]);
     }
 
+    /**
+ * @OA\Put(
+ *     path="/api/alumni/licenses",
+ *     summary="Update licenses list (JSON)",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="licenses", type="string", example="['License A', 'License B']")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Updated")
+ * )
+ */
     public function update_licenses()
     {
         $user_id = $this->_get_user_id();
@@ -248,6 +386,22 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200, ['status' => 'success', 'data' => $profile]);
     }
 
+    /**
+ * @OA\Delete(
+ *     path="/api/alumni/licenses",
+ *     summary="Delete a license by index",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="index", type="integer", example=0)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Deleted"),
+ *     @OA\Response(response=400, description="Invalid index")
+ * )
+ */
     public function delete_licenses()
     {
         $user_id = $this->_get_user_id();
@@ -268,6 +422,21 @@ class AlumniProfile extends BaseApiController{
         }
     }
 
+    /**
+ * @OA\Post(
+ *     path="/api/alumni/professional_courses",
+ *     summary="Add a new professional course",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="course", type="string", example="Advanced PHP")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Added")
+ * )
+ */
     public function add_professional_courses()
     {
         $user_id = $this->_get_user_id();
@@ -284,6 +453,21 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200, ['status' => 'success', 'data' => $profile]);
     }
 
+    /**
+ * @OA\Put(
+ *     path="/api/alumni/professional_courses",
+ *     summary="Update professional courses list (JSON)",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="professional_courses", type="string", example="['Course 1', 'Course 2']")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Updated")
+ * )
+ */
     public function update_professional_courses()
     {
         $user_id = $this->_get_user_id();
@@ -300,6 +484,22 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200, ['status' => 'success', 'data' => $profile]);
     }
 
+    /**
+ * @OA\Delete(
+ *     path="/api/alumni/professional_courses",
+ *     summary="Delete a professional course by index",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="index", type="integer", example=0)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Deleted"),
+ *     @OA\Response(response=400, description="Invalid index")
+ * )
+ */
     public function delete_professional_courses()
     {
         $user_id = $this->_get_user_id();
@@ -320,6 +520,21 @@ class AlumniProfile extends BaseApiController{
         }
     }
 
+    /**
+ * @OA\Post(
+ *     path="/api/alumni/employment_history",
+ *     summary="Add employment history entry",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="employment_data", type="string", example="Software Engineer at Google")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Added")
+ * )
+ */
     public function add_employment_history()
     {
         $user_id = $this->_get_user_id();
@@ -336,6 +551,21 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200, ['status' => 'success', 'data' => $profile]);
     }
 
+    /**
+ * @OA\Put(
+ *     path="/api/alumni/employment_history",
+ *     summary="Update employment history (JSON)",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="employment_history", type="string", example="['Job 1', 'Job 2']")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Updated")
+ * )
+ */
     public function update_employment_history()
     {
         $user_id = $this->_get_user_id();
@@ -352,6 +582,22 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200, ['status' => 'success', 'data' => $profile]);
     }
 
+    /**
+ * @OA\Delete(
+ *     path="/api/alumni/employment_history",
+ *     summary="Delete employment history entry by index",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="index", type="integer", example=0)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Deleted"),
+ *     @OA\Response(response=400, description="Invalid index")
+ * )
+ */
     public function delete_employment_history()
     {
         $user_id = $this->_get_user_id();
@@ -375,6 +621,16 @@ class AlumniProfile extends BaseApiController{
 
     
     
+    /**
+ * @OA\Get(
+ *     path="/api/alumni/profile/completion-status",
+ *     summary="Get profile completion status",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Status returned")
+ * )
+ */
     public function update_completion_status(){
         $user_id = $this->_get_user_id();
         $status = $this->profile_model->updateProfileCompletionStatus($user_id);

@@ -2,6 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH . 'core/BaseApiController.php';
+use OpenApi\Annotations as OA;
 
 /**
  * @OA\Tag(
@@ -18,9 +19,7 @@ class SlotResult extends BaseApiController {
         $this->load->model('slotresult_model');
     }
 
-    // ---------------------------------------------------------------
-    // Helper: resolve user_id from query string (alumni role required)
-    // ---------------------------------------------------------------
+    
     private function _get_user_id() {
         $this->_require_role(['alumni']);
         $user_id = $this->input->get('user_id');
@@ -30,9 +29,6 @@ class SlotResult extends BaseApiController {
         return $user_id;
     }
 
-    // ---------------------------------------------------------------
-    // GET api/slot_result?slot_id=X&user_id=Y
-    // ---------------------------------------------------------------
     /**
      * @OA\Get(
      *     path="/api/slots/result",
@@ -50,8 +46,7 @@ class SlotResult extends BaseApiController {
      * )
      */
     public function slot_result() {
-        $this->_get_user_id(); // Just verifies auth
-
+        $this->_get_user_id(); 
      
         $d=$this->_json_body();
         $slotId=$d['slot_id'];
@@ -72,13 +67,17 @@ class SlotResult extends BaseApiController {
         }
     }
 
-    // ---------------------------------------------------------------
-    // GET api/monthly_limit_status?user_id=X
-    // ---------------------------------------------------------------
     /**
-     * Returns how many wins the authenticated alumni has this month
-     * and whether they are still allowed to bid.
-     */
+ * @OA\Get(
+ *     path="/api/alumni/monthly-limit-status",
+ *     summary="Get monthly win limit status",
+ *     tags={"Slot Result"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\Response(response=200, description="Status returned"),
+ *     @OA\Response(response=400, description="Invalid input")
+ * )
+ */
     public function monthly_limit_status() {
         $userId = $this->_get_user_id();
 

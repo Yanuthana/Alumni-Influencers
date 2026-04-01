@@ -178,10 +178,7 @@ class SlotResult_model extends CI_Model {
         return $this->predict_winners_for_date(date('Y-m-d'));
     }
 
-    // ---------------------------------------------------------------
-    // MONTHLY WIN LIMIT HELPERS
-    // ---------------------------------------------------------------
-
+ 
     /**
      * Increment the win count for an alumni in the current month/year.
      * Inserts a new record if one doesn't exist yet.
@@ -239,10 +236,6 @@ class SlotResult_model extends CI_Model {
         return $record['wins_count'] >= $record['max_limit'];
     }
 
-    // ---------------------------------------------------------------
-    // VIEW SLOT RESULT
-    // ---------------------------------------------------------------
-
     /**
      * Get the result (winner details) for a specific slot.
      */
@@ -291,10 +284,6 @@ class SlotResult_model extends CI_Model {
 
         return ['status' => true, 'message' => 'Winner profile fetched successfully', 'data' => $result];
     }
-
-    // ---------------------------------------------------------------
-    // VIEW MONTHLY LIMIT STATUS (for an alumni)
-    // ---------------------------------------------------------------
 
     /**
      * Return monthly win limit status for the authenticated alumni.

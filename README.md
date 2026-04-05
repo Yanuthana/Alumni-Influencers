@@ -38,6 +38,37 @@ php index.php cron select_winner
 Or via the web:
 `http://your-domain/cron/select_winner`
 
+## 🔒 Kong API Gateway Setup
+
+The application uses **Kong API Gateway** to secure its APIs and manage API Keys. Certain endpoints are protected and only accessible via Kong.
+
+### Prerequisites
+
+- [Kong Gateway](https://docs.konghq.com/gateway/latest/install-and-run/) (OSS or Enterprise) installed and running.
+- **Key-Auth Plugin**: Must be enabled on your service/routes.
+
+### Configuration
+
+1. **Update .env**:
+   Ensure your `KONG_ADMIN_URL` is set to your Kong Admin instance (default is `http://127.0.0.1:8001`).
+   ```env
+   KONG_ADMIN_URL=http://127.0.0.1:8001
+   ```
+
+2. **Consumer Management**:
+   The application handles consumer creation automatically via the `ApiKeyManager` controller when generating or listing keys for a user.
+
+3. **Required Headers**:
+   When routing through Kong, the gateway should be configured to forward the following headers to the application:
+   - `X-Consumer-Username`
+   - `X-Consumer-ID`
+   - `X-Kong-Request-Id` (optional, for tracing)
+
+### How it Works
+
+- **Verification**: The `BaseApiController` and specific controllers (like `ViewWinner`) check for Kong-specific headers to ensure the request is proxied correctly.
+- **Key Management**: Developers can manage their API keys through the `/api/keys` endpoints, which communicate directly with Kong's Admin API.
+
 ## 🛠 Features
 
 - **Alumni Management**: Track and manage alumni profiles.

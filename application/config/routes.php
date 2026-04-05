@@ -68,8 +68,8 @@ $route['translate_uri_dashes'] = FALSE;
 // -------------------------
 $route['api/auth/register']['post']                = 'Auth/register';
 $route['api/auth/email/verify']['post']            = 'Auth/verify_email';
-$route['api/auth/sessions']['post']                = 'Auth/login';           // create session (login)
-$route['api/auth/sessions']['delete']              = 'Auth/logout';          // destroy session (logout)
+$route['api/auth/sessions']['post']                = 'Auth/login';          
+$route['api/auth/sessions']['delete']              = 'Auth/logout';         
 $route['api/auth/password/forgot']['post']         = 'Auth/forgot_password';
 $route['api/auth/password/otp/verify']['post']     = 'Auth/verify_otp';
 $route['api/auth/password/reset']['post']          = 'Auth/reset_password';
@@ -83,7 +83,7 @@ $route['api/alumni/profile/image']['put']          = 'AlumniProfile/update_profi
 $route['api/alumni/profile/linkedin']['put']       = 'AlumniProfile/update_linkedin_url';
 $route['api/alumni/profile/completion-status']['get'] = 'AlumniProfile/update_completion_status';
 
-// Degrees (stored as list -> operations currently index/body-driven)
+// Degrees 
 $route['api/alumni/degrees']['post']               = 'AlumniProfile/add_degrees';
 $route['api/alumni/degrees']['put']                = 'AlumniProfile/update_degrees';
 $route['api/alumni/degrees']['delete']             = 'AlumniProfile/delete_degrees';
@@ -115,10 +115,9 @@ $route['api/alumni/monthly-limit-status']['get']   = 'SlotResult/monthly_limit_s
 // /api/slots
 // -------------------------
 $route['api/slots']['get']                         = 'BiddingSystem/view_slots';
-// Slot winner result for a specific slot (preferred REST shape)
-$route['api/slots/result']['get']           = 'SlotResult/slot_result';
 
-// Admin-only trigger (kept, but made resource-ish)
+$route['api/slots/result']['get']                  = 'SlotResult/slot_result';
+
 $route['api/slots/winner-prediction']['post']      = 'SlotResult/predict_winner';
 
 // -------------------------
@@ -127,13 +126,12 @@ $route['api/slots/winner-prediction']['post']      = 'SlotResult/predict_winner'
 $route['api/bids']['post']                         = 'BiddingSystem/place_bid';
 $route['api/bids/history']['get']                  = 'BiddingSystem/view_bidding_history';
 
-// Preferred REST shape (requires minor controller tweak to accept URI bid_id)
-$route['api/bids']['put']                   = 'BiddingSystem/update_bid';
+$route['api/bids']['put']                          = 'BiddingSystem/update_bid';
 $route['api/bids']['delete']                       = 'BiddingSystem/cancel_bid';
-$route['api/bidsstatus']['get']            = 'BiddingSystem/view_bid_status';
+$route['api/bidsstatus']['get']                    = 'BiddingSystem/view_bid_status';
 
 // -------------------------
-// /api/featured-alumni (COURSEWORK SPEC – must match exactly)
+// /api/featured-alumni
 // -------------------------
 $route['api/featured-alumni']['get']               = 'ViewWinner/view_winner';
 

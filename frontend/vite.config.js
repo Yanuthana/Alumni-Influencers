@@ -4,16 +4,17 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     tailwindcss(),
   ],
+
   server: {
     proxy: {
       '/api': {
         target: 'http://localhost/Alumni-Influencers',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        changeOrigin: true
       },
     },
   },

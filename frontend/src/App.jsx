@@ -1,6 +1,7 @@
 import React from 'react';
 import SignupForm from './components/signup';
 import SigninForm from './components/Signin';
+import ForgotPasswordForm from './components/Forgotpassword';
 import Navbar from './components/Navbar';
 import { Toaster, toast } from 'react-hot-toast';
 import { toastConfig } from './config/toast-config';
@@ -9,6 +10,7 @@ import { verifyEmail, logout } from './services/auth-service';
 function App() {
   const [showSignup, setShowSignup] = React.useState(false);
   const [showSignin, setShowSignin] = React.useState(false);
+  const [showForgotPassword, setShowForgotPassword] = React.useState(false);
   const [prefilledEmail, setPrefilledEmail] = React.useState('');
   const [showDropDown, setShowDropDown] = React.useState(false);
   const [user, setUser] = React.useState(null);
@@ -67,7 +69,13 @@ function App() {
 
   const handleSigninClick = () => {
     setShowSignup(false);
+    setShowForgotPassword(false);
     setShowSignin(true);
+  };
+
+  const handleForgotPasswordClick = () => {
+    setShowSignin(false);
+    setShowForgotPassword(true);
   };
 
   const handleLoginSuccess = (userData) => {
@@ -110,6 +118,11 @@ function App() {
         initialEmail={prefilledEmail} 
         onSignupClick={handleSignupClick}
         onLoginSuccess={handleLoginSuccess}
+        onForgotPasswordClick={handleForgotPasswordClick}
+      />
+      <ForgotPasswordForm 
+        isOpen={showForgotPassword} 
+        onClose={() => setShowForgotPassword(false)} 
       />
 
 

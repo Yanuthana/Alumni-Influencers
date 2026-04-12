@@ -61,3 +61,45 @@ export const logout = async () => {
         return { status: 'error', message: 'Logout failed' };
     }
 };            
+export const forgotPassword = async (email) => {
+    try {
+        const response = await fetch('/api/auth/password/forgot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+        return await response.json();
+    } catch (error) {
+        return { status: 'error', message: 'Failed to send OTP' };
+    }
+};
+
+export const verifyOtp = async (email, otp) => {
+    try {
+        const response = await fetch('/api/auth/password/otp/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, otp }),
+        });
+        return await response.json();
+    } catch (error) {
+        return { status: 'error', message: 'Failed to verify OTP' };
+    }
+};
+
+export const resetPassword = async (confirmPassword, newPassword, resetToken) => {
+    try {
+        const response = await fetch('/api/auth/password/reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                reset_token: resetToken, 
+                password: newPassword, 
+                confirm_password: confirmPassword 
+            }),
+        });
+        return await response.json();
+    } catch (error) {
+        return { status: 'error', message: 'Failed to reset password' };
+    }
+};

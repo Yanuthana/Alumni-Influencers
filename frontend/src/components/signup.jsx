@@ -18,6 +18,7 @@ function SignupForm({ isOpen, onClose }) {
   const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -171,13 +172,25 @@ function SignupForm({ isOpen, onClose }) {
 
             <div className="space-y-2">
               <label className="text-sm font-label text-secondary" htmlFor="password">Password</label>
-              <input 
-                type="password" id="password" 
-                value={formData.password}
-                onChange={handleChange}
-                className={`w-full bg-surface-container-low border ${errors.password ? 'border-error' : 'border-outline-variant/30'} rounded-lg px-4 py-2.5 outline-none focus:border-primary transition-colors text-on-surface`}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} id="password" 
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`w-full bg-surface-container-low border ${errors.password ? 'border-error' : 'border-outline-variant/30'} rounded-lg px-4 py-2.5 pr-11 outline-none focus:border-primary transition-colors text-on-surface`}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  <span className="material-symbols-outlined text-[20px] block">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
               {errors.password && <p className="text-sm text-error font-label leading-tight">{errors.password}</p>}
             </div>
 

@@ -1,21 +1,118 @@
 import React from 'react';
 import SignupForm from './components/signup';
+import SigninForm from './components/Signin';
 import Navbar from './components/Navbar';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import { toastConfig } from './config/toast-config';
+import { verifyEmail, logout } from './services/auth-service';
 
 function App() {
   const [showSignup, setShowSignup] = React.useState(false);
+  const [showSignin, setShowSignin] = React.useState(false);
+  const [prefilledEmail, setPrefilledEmail] = React.useState('');
+  const [showDropDown, setShowDropDown] = React.useState(false);
+  const [user, setUser] = React.useState(null);
+
+  const verificationStarted = React.useRef(false);
+
+  React.useEffect(() => {
+    // Check for logged in user
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem('user');
+      }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('verify_token');
+    const email = urlParams.get('email');
+
+    if (token && !verificationStarted.current) {
+      verificationStarted.current = true;
+      const performVerification = async () => {
+        const response = await verifyEmail(token);
+        if (response && response.status === 'success') {
+          toast.success('Email verified successfully! Please sign in.');
+          setPrefilledEmail(email || '');
+          setShowSignin(true);
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } else {
+          toast.error(response.message || 'Verification failed.');
+          // Even if failed, clean up URL to prevent loops
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      };
+      performVerification();
+    }
+
+    // Close dropdown on click outside
+    const handleClickOutside = (e) => {
+      if (showDropDown && !e.target.closest('.user-profile-dropdown')) {
+        setShowDropDown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showDropDown]);
+
 
   const handleSignupClick = () => {
+    setShowSignin(false);
     setShowSignup(true);
+  };
+
+  const handleSigninClick = () => {
+    setShowSignup(false);
+    setShowSignin(true);
+  };
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setShowSignin(false);
+  };
+
+  const handleDropDown = () => {
+    setShowDropDown(!showDropDown);
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      localStorage.removeItem('api_token');
+      localStorage.removeItem('user');
+      setUser(null);
+      setShowDropDown(false);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      toast.error('Logout failed');
+    }
   };
 
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary/30 min-h-screen">
       <Toaster {...toastConfig} />
-      <Navbar onSignupClick={handleSignupClick} />
+      <Navbar 
+        onSignupClick={handleSignupClick} 
+        onSigninClick={handleSigninClick} 
+        user={user}
+        onLogout={handleLogout}
+        showDropDown={showDropDown}
+        onDropDownClick={handleDropDown}
+      />
       <SignupForm isOpen={showSignup} onClose={() => setShowSignup(false)} />
+      <SigninForm 
+        isOpen={showSignin} 
+        onClose={() => setShowSignin(false)} 
+        initialEmail={prefilledEmail} 
+        onSignupClick={handleSignupClick}
+        onLoginSuccess={handleLoginSuccess}
+      />
+
+
 
       <main className="pt-24">
         {/* Hero Section */}

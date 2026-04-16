@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { forgotPassword, verifyOtp, resetPassword } from '../services/auth-service';
 import toast from 'react-hot-toast';
 
@@ -11,6 +11,7 @@ function ForgotPasswordForm({ isOpen, onClose }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [resetToken,setResetToken] = useState('');
+  const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
 
   useEffect(() => {
     if (isOpen) {
@@ -34,6 +35,7 @@ function ForgotPasswordForm({ isOpen, onClose }) {
       const response = await forgotPassword(email);
       if (response.status === 'success') {
         toast.success(response.message || 'OTP sent to your email');
+        setOtp('');
         setPhase('otp');
       } else {
         toast.error(response.message || 'Failed to send OTP');
@@ -63,6 +65,36 @@ function ForgotPasswordForm({ isOpen, onClose }) {
       toast.error('An error occurred while verifying OTP');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOtpChange = (index, value) => {
+    // If user deleted character
+    if (!value) {
+      const newOtpArr = otp.split('');
+      newOtpArr[index] = '';
+      setOtp(newOtpArr.join(''));
+      return;
+    }
+
+    // Handle single digit input
+    const char = value.slice(-1);
+    const newOtpArr = otp.split('');
+    newOtpArr[index] = char;
+    const combinedOtp = newOtpArr.join('');
+    setOtp(combinedOtp);
+
+    // Auto focus next
+    if (char && index < 5) {
+      otpRefs[index + 1].current.focus();
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace') {
+      if (!otp[index] && index > 0) {
+        otpRefs[index - 1].current.focus();
+      }
     }
   };
 
@@ -133,37 +165,63 @@ function ForgotPasswordForm({ isOpen, onClose }) {
           )}
 
           {phase === 'otp' && (
-            <form className="space-y-6" onSubmit={handleOtpSubmit} noValidate>
-              <div className="space-y-2">
-                <label className="text-sm font-label text-secondary" htmlFor="otp">Enter OTP</label>
-                <input 
-                  type="text" id="otp" 
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-2.5 outline-none focus:border-primary transition-colors text-on-surface tracking-[0.5em] text-center text-xl font-bold"
-                  placeholder="••••••"
-                  maxLength={6}
-                  required
-                />
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex flex-col items-center mb-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 border border-primary/20">
+                  <span className="material-symbols-outlined text-primary text-4xl">verified_user</span>
+                </div>
+                <p className="text-on-surface-variant text-center text-sm leading-relaxed max-w-[280px]">
+                  We've sent a 6-digit verification code to your email address.
+                </p>
               </div>
 
-              <div className="pt-4 flex gap-3">
-                <button 
-                  type="button"
-                  onClick={() => setPhase('email')}
-                  className="flex-1 bg-surface-container border border-outline-variant/30 text-on-surface font-headline py-3 rounded-lg font-bold hover:bg-surface-variant transition-all"
-                >
-                  Back
-                </button>
-                <button 
-                  type="submit"
-                  disabled={isLoading}
-                  className={`flex-[2] murrey-gradient text-on-primary font-headline py-3 rounded-lg text-lg font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-[0.98] ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                >
-                  {isLoading ? 'Verifying...' : 'Verify OTP'}
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleOtpSubmit} className="space-y-8">
+                <div className="flex justify-between gap-2 px-2">
+                  {[0, 1, 2, 3, 4, 5].map((index) => (
+                    <input
+                      key={index}
+                      ref={otpRefs[index]}
+                      type="text"
+                      maxLength={1}
+                      value={otp[index] || ''}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      className="w-12 h-14 bg-surface-container-low border border-outline-variant/30 rounded-xl text-center text-xl font-bold text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    />
+                  ))}
+                </div>
+
+                <div className="space-y-6">
+                  <button 
+                    type="submit"
+                    disabled={isLoading || otp.length < 6}
+                    className={`w-full murrey-gradient text-on-primary font-headline py-4 rounded-xl text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] ${isLoading || otp.length < 6 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isLoading ? 'VERIFYING...' : 'VERIFY ACCOUNT'}
+                  </button>
+
+                  <div className="flex justify-center items-center px-1">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setPhase('email');
+                        setOtp('');
+                      }}
+                      className="text-xs font-label font-bold text-on-surface-variant hover:text-primary transition-colors uppercase tracking-wider"
+                    >
+                      Change Email
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex justify-center border-t border-outline-variant/10">
+                  <div className="flex items-center gap-2 text-on-surface-variant/40">
+                    <span className="material-symbols-outlined text-sm">lock</span>
+                    <span className="text-[10px] font-label uppercase tracking-[0.2em]">End-to-end Encrypted</span>
+                  </div>
+                </div>
+              </form>
+            </div>
           )}
 
           {phase === 'reset' && (

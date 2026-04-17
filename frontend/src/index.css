@@ -71,10 +71,10 @@
 }
 
 .murrey-gradient {
-    background: linear-gradient(135deg, #ffb0c9 0%, #8b004b 100%);
+  background: linear-gradient(135deg, #ffb0c9 0%, #8b004b 100%);
 }
 
 .glass-header {
-    background: rgba(19, 19, 19, 0.8);
-    backdrop-filter: blur(20px);
+  background: rgba(19, 19, 19, 0.8);
+  backdrop-filter: blur(20px);
 }

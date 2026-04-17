@@ -1,13 +1,18 @@
 import React from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Toaster, toast } from 'react-hot-toast';
 import SignupForm from './components/signup';
 import SigninForm from './components/Signin';
 import ForgotPasswordForm from './components/Forgotpassword';
 import Navbar from './components/Navbar';
-import { Toaster, toast } from 'react-hot-toast';
+import Dashboard from './Dashboard';
+import Home from './pages/Home';
 import { toastConfig } from './config/toast-config';
 import { verifyEmail, logout } from './services/auth-service';
 
 function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [showSignup, setShowSignup] = React.useState(false);
   const [showSignin, setShowSignin] = React.useState(false);
   const [showForgotPassword, setShowForgotPassword] = React.useState(false);
@@ -23,29 +28,32 @@ function App() {
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
-      } catch (e) {
+      } catch {
         localStorage.removeItem('user');
       }
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(location.search);
     const token = urlParams.get('verify_token');
     const email = urlParams.get('email');
 
     if (token && !verificationStarted.current) {
       verificationStarted.current = true;
       const performVerification = async () => {
-        const response = await verifyEmail(token);
-        if (response && response.status === 'success') {
-          toast.success('Email verified successfully! Please sign in.');
-          setPrefilledEmail(email || '');
-          setShowSignin(true);
-          // Clean up URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } else {
-          toast.error(response.message || 'Verification failed.');
-          // Even if failed, clean up URL to prevent loops
-          window.history.replaceState({}, document.title, window.location.pathname);
+        try {
+          const response = await verifyEmail(token);
+          if (response && response.status === 'success') {
+            toast.success('Email verified successfully! Please sign in.');
+            setPrefilledEmail(email || '');
+            setShowSignin(true);
+          } else {
+            toast.error(response.message || 'Verification failed.');
+          }
+        } catch (err) {
+          toast.error('Verification failed due to a network error.');
+        } finally {
+          // Clean up URL using router instead of window.history
+          navigate(location.pathname, { replace: true });
         }
       };
       performVerification();
@@ -59,7 +67,7 @@ function App() {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showDropDown]);
+  }, [location.pathname, location.search, showDropDown, navigate]);
 
 
   const handleSignupClick = () => {
@@ -80,7 +88,9 @@ function App() {
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
     setShowSignin(false);
+    navigate('/dashboard');
   };
 
   const handleDropDown = () => {
@@ -95,76 +105,81 @@ function App() {
       setUser(null);
       setShowDropDown(false);
       toast.success('Logged out successfully');
-    } catch (error) {
+      navigate('/');
+    } catch {
       toast.error('Logout failed');
+    }
+  };
+
+  const handlePrimaryCta = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      handleSigninClick();
+    }
+  };
+
+  const handleSecondaryCta = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      handleSignupClick();
     }
   };
 
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary/30 min-h-screen">
       <Toaster {...toastConfig} />
-      <Navbar 
-        onSignupClick={handleSignupClick} 
-        onSigninClick={handleSigninClick} 
+      <Navbar
+        onSignupClick={handleSignupClick}
+        onSigninClick={handleSigninClick}
         user={user}
         onLogout={handleLogout}
         showDropDown={showDropDown}
         onDropDownClick={handleDropDown}
       />
+
       <SignupForm isOpen={showSignup} onClose={() => setShowSignup(false)} />
-      <SigninForm 
-        isOpen={showSignin} 
-        onClose={() => setShowSignin(false)} 
-        initialEmail={prefilledEmail} 
+      <SigninForm
+        isOpen={showSignin}
+        onClose={() => setShowSignin(false)}
+        initialEmail={prefilledEmail}
         onSignupClick={handleSignupClick}
         onLoginSuccess={handleLoginSuccess}
         onForgotPasswordClick={handleForgotPasswordClick}
       />
-      <ForgotPasswordForm 
-        isOpen={showForgotPassword} 
-        onClose={() => setShowForgotPassword(false)} 
+      <ForgotPasswordForm
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
       />
 
-
-
-      <main className="pt-24">
-        {/* Hero Section */}
-        <section className="relative min-h-[870px] flex items-center px-8 md:px-24 overflow-hidden">
-
-          <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/80 to-transparent z-10"></div>
-            <img
-              alt=""
-              className="w-full h-full object-cover grayscale opacity-40"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVjYt1pNaqB2lgms7HEZNLfYopElXG8gNQ5HxhgSktlBdZKi16yLCSZU13vVa_kL5ApWaJHUr8jpjPjNmvtM0oVU48UKVqNbI50JSQAiAPZPT8dB9nT2z0GRu_45tNV4KfyiAxtaWebQwoi9C9t-F4lmKs9vSsUov_i55aoehQtdU9ajr6wvWhDYJrbiNRaYEwKho2G4CFxkblrMMrvaxQmxAuKPA8fkHDBXUo5fdz0gVZLbbPOWfw8hpKxlUl1d1LUEbp1egTSOrg" 
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Home 
+              user={user} 
+              onPrimaryCta={handlePrimaryCta} 
+              onSecondaryCta={handleSecondaryCta} 
             />
-          </div>
-
-
-          <div className="relative z-20 max-w-4xl">
-            <span className="text-sm uppercase tracking-[0.2em] text-primary mb-6 block font-label font-semibold">
-              The Digital Atelier of Excellence
-            </span>
-            <h1 className="text-6xl md:text-8xl font-headline font-bold leading-[0.9] tracking-tighter text-on-surface mb-8 italic">
-              Legacy Meets <br />
-              <span className="text-secondary opacity-80 font-normal">Innovation.</span>
-            </h1>
-            <p className="text-xl md:text-2xl font-headline text-secondary max-w-2xl mb-12 leading-relaxed">
-              Bridging the gap between the historic halls of Westminster and the global frontiers of industry through an exclusive alumni-student mentorship ecosystem.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6">
-              <button className="murrey-gradient text-on-primary px-8 py-4 rounded-md font-headline text-xl font-bold hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95">
-                Begin Your Mentorship
-              </button>
-              <button className="border border-outline-variant/30 text-on-surface px-8 py-4 rounded-md font-headline text-xl hover:bg-surface-container-high transition-all active:scale-95">
-                Explore the Network
-              </button>
-            </div>
-          </div>
-        </section>
-      </main>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            user ? (
+              <Dashboard user={user} />
+            ) : (
+              <Navigate replace to="/" />
+            )
+          }
+        />
+        {/* Fallback route to prevent black screen on unknown paths */}
+        <Route path="*" element={<Navigate replace to="/" />} />
+      </Routes>
     </div>
   );
 }
+
 
 export default App;

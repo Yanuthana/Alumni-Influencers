@@ -144,4 +144,19 @@ class BaseApiController extends CI_Controller
         return $user; // Return user so the controller can use the data
     }
 
+    protected function _require_authenticated_user()
+    {
+        $token = $this->_bearer_token();
+        if (!$token) {
+            $this->_respond(401, ['status' => 'error', 'message' => 'Bearer token is required']);
+            return;
+        }
+
+        try {
+            return (array) JWT::decode($token, new Key($this->JWT_KEY, 'HS256'));
+        } catch (Exception $e) {
+            $this->_respond(401, ['status' => 'error', 'message' => 'Invalid or expired token: ' . $e->getMessage()]);
+        }
+    }
+
 }

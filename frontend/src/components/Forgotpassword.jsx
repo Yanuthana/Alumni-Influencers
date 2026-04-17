@@ -10,7 +10,7 @@ function ForgotPasswordForm({ isOpen, onClose }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [resetToken,setResetToken] = useState('');
+  const [resetToken, setResetToken] = useState('');
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
 
   useEffect(() => {
@@ -103,10 +103,10 @@ function ForgotPasswordForm({ isOpen, onClose }) {
     if (newPassword.length < 8) return toast.error('Password must be at least 8 characters');
     if (newPassword !== confirmPassword) return toast.error('Passwords do not match');
     if (!resetToken) return toast.error('Please verify OTP first');
-    
+
     setIsLoading(true);
     try {
-      const response = await resetPassword(confirmPassword,newPassword,resetToken);
+      const response = await resetPassword(confirmPassword, newPassword, resetToken);
       if (response.status === 'success') {
         toast.success('Password reset successfully! Please sign in with your new password.');
         onClose();
@@ -130,7 +130,7 @@ function ForgotPasswordForm({ isOpen, onClose }) {
               {phase === 'otp' && 'Verify OTP'}
               {phase === 'reset' && 'Reset Password'}
             </h1>
-            <button 
+            <button
               onClick={onClose}
               className="p-2 hover:bg-surface-variant rounded-full transition-colors text-on-surface-variant"
             >
@@ -142,8 +142,8 @@ function ForgotPasswordForm({ isOpen, onClose }) {
             <form className="space-y-6" onSubmit={handleEmailSubmit} noValidate>
               <div className="space-y-2">
                 <label className="text-sm font-label text-secondary" htmlFor="email">Email address</label>
-                <input 
-                  type="email" id="email" 
+                <input
+                  type="email" id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-2.5 outline-none focus:border-primary transition-colors text-on-surface"
@@ -153,7 +153,7 @@ function ForgotPasswordForm({ isOpen, onClose }) {
               </div>
 
               <div className="pt-4">
-                <button 
+                <button
                   type="submit"
                   disabled={isLoading}
                   className={`w-full murrey-gradient text-on-primary font-headline py-3 rounded-lg text-lg font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-[0.98] ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
@@ -192,7 +192,7 @@ function ForgotPasswordForm({ isOpen, onClose }) {
                 </div>
 
                 <div className="space-y-6">
-                  <button 
+                  <button
                     type="submit"
                     disabled={isLoading || otp.length < 6}
                     className={`w-full murrey-gradient text-on-primary font-headline py-4 rounded-xl text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] ${isLoading || otp.length < 6 ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -201,7 +201,7 @@ function ForgotPasswordForm({ isOpen, onClose }) {
                   </button>
 
                   <div className="flex justify-center items-center px-1">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => {
                         setPhase('email');
@@ -229,8 +229,8 @@ function ForgotPasswordForm({ isOpen, onClose }) {
               <div className="space-y-2">
                 <label className="text-sm font-label text-secondary" htmlFor="newPassword">New Password</label>
                 <div className="relative">
-                  <input 
-                    type={showPassword ? "text" : "password"} id="newPassword" 
+                  <input
+                    type={showPassword ? "text" : "password"} id="newPassword"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-2.5 pr-11 outline-none focus:border-primary transition-colors text-on-surface"
@@ -251,8 +251,8 @@ function ForgotPasswordForm({ isOpen, onClose }) {
 
               <div className="space-y-2">
                 <label className="text-sm font-label text-secondary" htmlFor="confirmPassword">Confirm Password</label>
-                <input 
-                  type="password" id="confirmPassword" 
+                <input
+                  type="password" id="confirmPassword"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-2.5 outline-none focus:border-primary transition-colors text-on-surface"
@@ -262,7 +262,7 @@ function ForgotPasswordForm({ isOpen, onClose }) {
               </div>
 
               <div className="pt-4">
-                <button 
+                <button
                   type="submit"
                   disabled={isLoading}
                   className={`w-full murrey-gradient text-on-primary font-headline py-3 rounded-lg text-lg font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-[0.98] ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}

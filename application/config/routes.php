@@ -131,6 +131,12 @@ $route['api/bids']['delete']                       = 'BiddingSystem/cancel_bid';
 $route['api/bidsstatus']['get']                    = 'BiddingSystem/view_bid_status';
 
 // -------------------------
+// /api/dashboard/*
+// -------------------------
+$route['api/dashboard/personal']['get']            = 'DashboardAnalytics/personal';
+$route['api/dashboard/global']['get']              = 'DashboardAnalytics/global';
+
+// -------------------------
 // /api/featured-alumni
 // -------------------------
 $route['api/featured-alumni']['get']               = 'ViewWinner/view_winner';

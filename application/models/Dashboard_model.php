@@ -10,7 +10,7 @@ class Dashboard_model extends CI_Model
 
     public function getPersonalInsights($userId)
     {
-        $this->db->select('a.alumni_id, a.is_active_winner, ap.degrees, ap.certifications, ap.professional_courses, ap.employment_history');
+        $this->db->select('a.alumni_id, a.is_active_winner, ap.degrees, ap.certifications, ap.professional_courses, ap.employment_history, ap.licenses');
         $this->db->from('alumni a');
         $this->db->join('alumni_profiles ap', 'ap.alumni_id = a.alumni_id', 'left');
         $this->db->where('a.user_id', $userId);
@@ -20,11 +20,18 @@ class Dashboard_model extends CI_Model
             return false;
         }
 
+        $degrees = $this->decodeJsonList($profile['degrees'] ?? null);
+        $certs = $this->decodeJsonList($profile['certifications'] ?? null);
+        $courses = $this->decodeJsonList($profile['professional_courses'] ?? null);
+        $history = $this->decodeJsonList($profile['employment_history'] ?? null);
+        $licenses = $this->decodeJsonList($profile['licenses'] ?? null);
+
         $profileBreakdown = [
-            'education' => $this->hasContent($profile['degrees'] ?? null),
-            'certifications' => $this->hasContent($profile['certifications'] ?? null),
-            'experience' => $this->hasContent($profile['employment_history'] ?? null),
-            'professionalCourses' => $this->hasContent($profile['professional_courses'] ?? null),
+            'education' => count($degrees) > 0,
+            'certifications' => count($certs) > 0,
+            'experience' => count($history) > 0,
+            'professionalCourses' => count($courses) > 0,
+            'licenses' => count($licenses) > 0,
         ];
 
         $completedSections = array_sum(array_map(static function ($value) {
@@ -43,6 +50,13 @@ class Dashboard_model extends CI_Model
             'activeBidders' => $this->countActiveBidders(),
             'skills' => $this->extractTopSkills($profile, 6),
             'profileBreakdown' => $profileBreakdown,
+            'detailedProfile' => [
+                'degrees' => $degrees,
+                'certifications' => $certs,
+                'professionalCourses' => $courses,
+                'employmentHistory' => $history,
+                'licenses' => $licenses,
+            ],
             'biddingStats' => [
                 'wins' => $wins,
                 'totalBids' => $totalBids,
@@ -50,15 +64,16 @@ class Dashboard_model extends CI_Model
                 'activeWinner' => (bool) ($profile['is_active_winner'] ?? 0),
             ],
         ];
+
     }
 
     public function getGlobalInsights()
     {
         return [
             'topOccupations' => $this->aggregateOccupations(6),
-            'topCertifications' => $this->aggregateJsonColumn('certifications', 6),
+            'topCertifications' => $this->aggregateJsonColumn('certifications', 6, 'name'),
             'topCourses' => $this->aggregateCourses(6),
-            'topDegrees' => $this->aggregateJsonColumn('degrees', 6),
+            'topDegrees' => $this->aggregateJsonColumn('degrees', 6, 'title'),
         ];
     }
 
@@ -92,14 +107,15 @@ class Dashboard_model extends CI_Model
         return (int) $this->db->count_all_results();
     }
 
-    private function aggregateJsonColumn($column, $limit = 6)
+    private function aggregateJsonColumn($column, $limit = 6, $key = 'name')
     {
         $rows = $this->db->select($column)->get('alumni_profiles')->result_array();
         $counts = [];
 
         foreach ($rows as $row) {
             foreach ($this->decodeJsonList($row[$column] ?? null) as $item) {
-                $label = $this->normalizeLabel($item);
+                $value = is_array($item) ? ($item[$key] ?? '') : $item;
+                $label = $this->normalizeLabel($value);
                 if ($label === '') {
                     continue;
                 }
@@ -117,7 +133,8 @@ class Dashboard_model extends CI_Model
 
         foreach ($rows as $row) {
             foreach ($this->decodeJsonList($row['professional_courses'] ?? null) as $course) {
-                $label = $this->normalizeLabel($course);
+                $value = is_array($course) ? ($course['name'] ?? '') : $course;
+                $label = $this->normalizeLabel($value);
                 if ($label === '') {
                     continue;
                 }
@@ -180,22 +197,23 @@ class Dashboard_model extends CI_Model
         $keywords = [
             'React', 'Next.js', 'JavaScript', 'TypeScript', 'Java', 'PHP', 'Python',
             'Data Science', 'Cloud', 'AWS', 'DevOps', 'AI', 'Machine Learning',
-            'Project Management', 'Business Analysis', 'Leadership', 'Finance'
+            'Project Management', 'Business Analysis', 'Leadership', 'Finance', 'BSc', 'IT', 'Analyst'
         ];
 
         $counts = [];
 
         foreach ($sources as $source) {
+            $text = is_array($source) ? implode(' ', array_values($source)) : (string) $source;
             $matched = false;
             foreach ($keywords as $keyword) {
-                if (stripos($source, $keyword) !== false) {
+                if (stripos($text, $keyword) !== false) {
                     $counts[$keyword] = ($counts[$keyword] ?? 0) + 1;
                     $matched = true;
                 }
             }
 
             if (!$matched) {
-                $fallback = $this->normalizeLabel($source);
+                $fallback = $this->normalizeLabel($text);
                 if ($fallback !== '') {
                     $counts[$fallback] = ($counts[$fallback] ?? 0) + 1;
                 }
@@ -205,8 +223,9 @@ class Dashboard_model extends CI_Model
         return $this->formatCounts($counts, $limit);
     }
 
-    private function extractOccupation($value)
+    private function extractOccupation($item)
     {
+        $value = is_array($item) ? ($item['position'] ?? '') : (string) $item;
         $label = trim((string) preg_split('/\s+(at|@|-|,)\s+/i', (string) $value)[0]);
         return $this->normalizeLabel($label);
     }
@@ -217,7 +236,7 @@ class Dashboard_model extends CI_Model
         foreach ($providers as $provider) {
             if (stripos($value, $provider) !== false) {
                 return $provider;
-            }
+                }
         }
 
         return 'Independent';
@@ -239,12 +258,9 @@ class Dashboard_model extends CI_Model
             return [];
         }
 
-        return array_values(array_filter(array_map(function ($item) {
-            if (is_string($item)) {
-                return trim($item);
-            }
-            return '';
-        }, $decoded)));
+        return array_values(array_filter($decoded, function ($item) {
+            return !empty($item);
+        }));
     }
 
     private function normalizeLabel($value)
@@ -253,3 +269,4 @@ class Dashboard_model extends CI_Model
         return mb_substr($label, 0, 40);
     }
 }
+

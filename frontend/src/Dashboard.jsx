@@ -309,6 +309,7 @@ function Dashboard({ user }) {
                                                 {[
                                                     ['Education', personalData.profileBreakdown?.education],
                                                     ['Certifications', personalData.profileBreakdown?.certifications],
+                                                    ['Licenses', personalData.profileBreakdown?.licenses],
                                                     ['Experience', personalData.profileBreakdown?.experience],
                                                     ['Professional Courses', personalData.profileBreakdown?.professionalCourses],
                                                 ].map(([label, complete]) => (
@@ -326,6 +327,77 @@ function Dashboard({ user }) {
                                         </div>
                                     </PanelCard>
                                 </div>
+
+                                <section className="mt-12">
+                                    <SectionHeader
+                                        eyebrow="Verification"
+                                        title="Detailed Profile Records"
+                                        description="Direct records retrieved from your verified alumni profile."
+                                    />
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        <PanelCard eyebrow="Education" title="Degrees & Qualifications">
+                                            {personalData.detailedProfile?.degrees?.length > 0 ? (
+                                                <div className="space-y-4">
+                                                    {personalData.detailedProfile.degrees.map((deg, index) => (
+                                                        <div key={index} className="border-l-2 border-primary/30 pl-4 py-1">
+                                                            <p className="font-headline text-lg text-on-surface">{deg.title}</p>
+                                                            <p className="text-sm text-secondary">{deg.institution} • {deg.year}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : <p className="text-secondary italic">No degree records found.</p>}
+                                        </PanelCard>
+
+                                        <PanelCard eyebrow="Credentials" title="Certifications">
+                                            {personalData.detailedProfile?.certifications?.length > 0 ? (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {personalData.detailedProfile.certifications.map((cert, index) => (
+                                                        <div key={index} className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 w-full">
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="material-symbols-outlined text-primary">verified</span>
+                                                                <div>
+                                                                    <p className="font-headline text-on-surface">{cert.name}</p>
+                                                                    <p className="text-xs text-secondary">{cert.issuer} • {cert.year}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : <p className="text-secondary italic">No certifications recorded.</p>}
+                                        </PanelCard>
+
+                                        <PanelCard eyebrow="Learning" title="Professional Courses">
+                                            {personalData.detailedProfile?.professionalCourses?.length > 0 ? (
+                                                <div className="space-y-3">
+                                                    {personalData.detailedProfile.professionalCourses.map((course, index) => (
+                                                        <div key={index} className="flex justify-between items-center rounded-2xl bg-black/20 p-4">
+                                                            <div>
+                                                                <p className="text-on-surface font-medium">{course.name}</p>
+                                                                <p className="text-xs text-secondary">{course.provider}</p>
+                                                            </div>
+                                                            <span className="text-xs font-label text-primary">{course.year}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : <p className="text-secondary italic">No professional courses found.</p>}
+                                        </PanelCard>
+
+                                        <PanelCard eyebrow="Career" title="Employment History">
+                                            {personalData.detailedProfile?.employmentHistory?.length > 0 ? (
+                                                <div className="space-y-4">
+                                                    {personalData.detailedProfile.employmentHistory.map((job, index) => (
+                                                        <div key={index} className="relative pl-6 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-px before:bg-outline-variant/30">
+                                                            <div className="absolute left-[-4px] top-2 h-2 w-2 rounded-full bg-primary" />
+                                                            <p className="font-headline text-on-surface">{job.position}</p>
+                                                            <p className="text-sm text-secondary">{job.company || job.employer}</p>
+                                                            <p className="text-xs text-secondary/60 mt-1">{job.years || job.period}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : <p className="text-secondary italic">No employment history found.</p>}
+                                        </PanelCard>
+                                    </div>
+                                </section>
 
                                 <PanelCard eyebrow="Performance" title="Personal Bidding Performance">
                                     <div className="grid gap-4 md:grid-cols-3">

@@ -37,29 +37,32 @@ class BiddingSystem extends BaseApiController
     /**
      * @OA\Get(
      *     path="/api/slots",
-     *     summary="View available bidding slots",
+     *     summary="View available bidding slots (today + tomorrow)",
      *     tags={"Bidding System"},
      *     security={{"bearerAuth": {}}},
-     *     @OA\Response(response=200, description="List of slots"),
+     *     @OA\Response(response=200, description="Array of available slots with is_locked metadata"),
      *     @OA\Response(response=500, description="Error fetching slots")
      * )
+     *
+     * Returns up to two slots:
+     *   - Today's slot  : visible & biddable when current time < 18:00
+     *   - Tomorrow's slot : always visible; is_locked=true until 18:00 today
      */
     public function view_slots()
     {
-        // Get tomorrow's slot (this will auto-create slots if needed)
         $this->_require_role(['alumni']);
-        $slot = $this->bidding_model->getTomorrowSlot();
+        $slots = $this->bidding_model->getAvailableSlots();
 
-        if ($slot) {
+        if (!empty($slots)) {
             $this->_respond(200, [
-                'status' => 'success',
-                'message' => 'Slot details fetched successfully',
-                'data' => $slot
+                'status'  => 'success',
+                'message' => 'Available slots fetched successfully',
+                'data'    => $slots        // always an array
             ]);
         } else {
             $this->_respond(500, [
-                'status' => 'error',
-                'message' => 'Unable to fetch or generate slot',
+                'status'  => 'error',
+                'message' => 'Unable to fetch or generate slots',
             ]);
         }
     }
@@ -119,21 +122,21 @@ class BiddingSystem extends BaseApiController
 
 
     /**
- * @OA\Delete(
- *     path="/api/bids",
- *     summary="Cancel a bid",
- *     tags={"Bidding System"},
- *     security={{"bearerAuth": {}}},
- *     @OA\RequestBody(
- *         @OA\JsonContent(
- *             required={"bid_id"},
- *             @OA\Property(property="bid_id", type="integer", example=1)
- *         )
- *     ),
- *     @OA\Response(response=200, description="Bid canceled"),
- *     @OA\Response(response=400, description="Invalid input")
- * )
- */
+     * @OA\Delete(
+     *     path="/api/bids",
+     *     summary="Cancel a bid",
+     *     tags={"Bidding System"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"bid_id"},
+     *             @OA\Property(property="bid_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Bid canceled"),
+     *     @OA\Response(response=400, description="Invalid input")
+     * )
+     */
     public function cancel_bid()
     {
         $d = $this->_json_body();
@@ -166,22 +169,22 @@ class BiddingSystem extends BaseApiController
     }
 
     /**
- * @OA\Put(
- *     path="/api/bids",
- *     summary="Update a bid amount",
- *     tags={"Bidding System"},
- *     security={{"bearerAuth": {}}},
- *     @OA\RequestBody(
- *         @OA\JsonContent(
- *             required={"bid_id", "bid_amount"},
- *             @OA\Property(property="bid_id", type="integer", example=1),
- *             @OA\Property(property="bid_amount", type="number", example=60.0)
- *         )
- *     ),
- *     @OA\Response(response=200, description="Bid updated"),
- *     @OA\Response(response=400, description="Invalid input")
- * )
- */
+     * @OA\Put(
+     *     path="/api/bids",
+     *     summary="Update a bid amount",
+     *     tags={"Bidding System"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"bid_id", "bid_amount"},
+     *             @OA\Property(property="bid_id", type="integer", example=1),
+     *             @OA\Property(property="bid_amount", type="number", example=60.0)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Bid updated"),
+     *     @OA\Response(response=400, description="Invalid input")
+     * )
+     */
     public function update_bid()
     {
 
@@ -216,21 +219,21 @@ class BiddingSystem extends BaseApiController
     }
 
     /**
- * @OA\Get(
- *     path="/api/bidsstatus",
- *     summary="Get specific bid status",
- *     tags={"Bidding System"},
- *     security={{"bearerAuth": {}}},
- *     @OA\RequestBody(
- *         @OA\JsonContent(
- *             required={"bid_id"},
- *             @OA\Property(property="bid_id", type="integer", example=1)
- *         )
- *     ),
- *     @OA\Response(response=200, description="Status returned"),
- *     @OA\Response(response=400, description="Invalid bid_id")
- * )
- */
+     * @OA\Get(
+     *     path="/api/bidsstatus",
+     *     summary="Get specific bid status",
+     *     tags={"Bidding System"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"bid_id"},
+     *             @OA\Property(property="bid_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Status returned"),
+     *     @OA\Response(response=400, description="Invalid bid_id")
+     * )
+     */
     public function view_bid_status()
     {
         $d = $this->_json_body();
@@ -264,14 +267,14 @@ class BiddingSystem extends BaseApiController
     }
 
     /**
- * @OA\Get(
- *     path="/api/bids/history",
- *     summary="View alumni bidding history",
- *     tags={"Bidding System"},
- *     security={{"bearerAuth": {}}},
- *     @OA\Response(response=200, description="History returned")
- * )
- */
+     * @OA\Get(
+     *     path="/api/bids/history",
+     *     summary="View alumni bidding history",
+     *     tags={"Bidding System"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="History returned")
+     * )
+     */
     public function view_bidding_history()
     {
         $userId = $this->_get_user_id();

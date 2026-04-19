@@ -6,6 +6,7 @@ function Navbar({ onSignupClick, onSigninClick, user, onLogout, showDropDown, on
   const desktopNavLinks = [
     { label: 'Home', to: '/', requiresAuth: false },
     { label: 'Dashboard', to: '/dashboard', requiresAuth: true },
+    { label: 'Bid Arena', to: '/bid-arena', requiresAuth: true },
     { label: 'Mentorship', to: '/', requiresAuth: false },
     { label: 'Knowledge Hub', to: '/', requiresAuth: false },
     { label: 'Events', to: '/', requiresAuth: false },

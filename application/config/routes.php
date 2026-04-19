@@ -128,7 +128,7 @@ $route['api/bids/history']['get']                  = 'BiddingSystem/view_bidding
 
 $route['api/bids']['put']                          = 'BiddingSystem/update_bid';
 $route['api/bids']['delete']                       = 'BiddingSystem/cancel_bid';
-$route['api/bidsstatus']['get']                    = 'BiddingSystem/view_bid_status';
+$route['api/bidsstatus']['post']                    = 'BiddingSystem/view_bid_status';
 
 // -------------------------
 // /api/dashboard/*

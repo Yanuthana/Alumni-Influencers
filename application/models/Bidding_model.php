@@ -17,28 +17,53 @@ class Bidding_model extends CI_Model
     }
 
     /**
-     * Get's tomorrow's bidding slot.
-     * Automatically ensures slots for tomorrow and the day after are created if it's past 6 PM.
+     * Returns currently biddable slots:
+     *   1. Today's slot  — shown only if current time < 6 PM (bidding window still open).
+     *   2. Tomorrow's slot — always shown; flagged is_locked=true until 6 PM today opens bidding.
+     *
+     * Also auto-creates any missing slots and, past 6 PM, creates the day-after-tomorrow slot.
      */
-    public function getTomorrowSlot()
+    public function getAvailableSlots()
     {
-        $currentTime = time();
-        $todayStr = date('Y-m-d', $currentTime);
-        $tomorrowStr = date('Y-m-d', strtotime('+1 day', $currentTime));
-        $dayAfterTomorrowStr = date('Y-m-d', strtotime('+2 days', $currentTime));
+        $currentTime  = time();
+        $todayStr     = date('Y-m-d', $currentTime);
+        $tomorrowStr  = date('Y-m-d', strtotime('+1 day',  $currentTime));
+        $dayAfterStr  = date('Y-m-d', strtotime('+2 days', $currentTime));
 
-        $sixPMToday = strtotime($todayStr . ' 18:00:00');
+        $sixPMToday   = strtotime($todayStr . ' 18:00:00');
+        $isPast6PM    = $currentTime >= $sixPMToday;
 
-        // Always ensure tomorrow's slot exists
+        // Ensure tomorrow's slot exists always
         $this->ensureSlotExists($tomorrowStr);
 
-        // Every 6 PM, create next two slots automatically
-        if ($currentTime >= $sixPMToday) {
-            $this->ensureSlotExists($dayAfterTomorrowStr);
+        // After 6 PM, also ensure the day-after-tomorrow slot
+        if ($isPast6PM) {
+            $this->ensureSlotExists($dayAfterStr);
         }
 
-        // Return tomorrow's slot details
-        return $this->db->get_where('Slot', ['slot_date' => $tomorrowStr])->row_array();
+        $slots = [];
+
+        // ── Today's slot (biddable until 6 PM) ──────────────
+        if (!$isPast6PM) {
+            $todaySlot = $this->db->get_where('Slot', ['slot_date' => $todayStr])->row_array();
+            if ($todaySlot) {
+                $todaySlot['is_locked']   = false;
+                $todaySlot['lock_reason'] = null;
+                $todaySlot['opens_at']    = null;
+                $slots[] = $todaySlot;
+            }
+        }
+
+        // ── Tomorrow's slot (locked until 6 PM today) ───────
+        $tomorrowSlot = $this->db->get_where('Slot', ['slot_date' => $tomorrowStr])->row_array();
+        if ($tomorrowSlot) {
+            $tomorrowSlot['is_locked']   = !$isPast6PM;           // locked before 6 PM
+            $tomorrowSlot['lock_reason'] = !$isPast6PM ? 'Opens at 6 PM today' : null;
+            $tomorrowSlot['opens_at']    = !$isPast6PM ? ($todayStr . ' 18:00:00') : null;
+            $slots[] = $tomorrowSlot;
+        }
+
+        return $slots;
     }
 
     /**
@@ -232,7 +257,7 @@ class Bidding_model extends CI_Model
             return ['status' => false, 'message' => 'Alumni account not found'];
         }
 
-        $this->db->select('s.slot_date, b.bid_amount, b.status as result_status');
+        $this->db->select('b.bid_id, b.slot_id, s.slot_date, b.bid_amount, b.status as result_status');
         $this->db->from('Bid b');
         $this->db->join('Slot s', 'b.slot_id = s.slot_id');
         $this->db->where('b.alumni_id', $alumniId);

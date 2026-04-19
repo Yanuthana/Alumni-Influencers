@@ -6,6 +6,7 @@ import SigninForm from './components/Signin';
 import ForgotPasswordForm from './components/Forgotpassword';
 import Navbar from './components/Navbar';
 import Dashboard from './Dashboard';
+import BidArena from './pages/BidArena';
 import Home from './pages/Home';
 import { toastConfig } from './config/toast-config';
 import { verifyEmail, logout } from './services/auth-service';
@@ -169,6 +170,16 @@ function App() {
           element={
             user ? (
               <Dashboard user={user} />
+            ) : (
+              <Navigate replace to="/" />
+            )
+          }
+        />
+        <Route
+          path="/bid-arena"
+          element={
+            user ? (
+              <BidArena user={user} />
             ) : (
               <Navigate replace to="/" />
             )

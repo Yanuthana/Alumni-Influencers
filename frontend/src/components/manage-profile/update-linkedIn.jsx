@@ -1,10 +1,15 @@
 import React from 'react';
 import { Dialog } from '../dialog';
 
-export const UpdateLinkedIn = ({ isOpen, onClose, onConfirm, initialValue = '' }) => {
-    const [linkedinUrl, setLinkedinUrl] = React.useState(initialValue);
+export function UpdateLinkedIn(props) {
+    let isOpen = props.isOpen;
+    let onClose = props.onClose;
+    let onConfirm = props.onConfirm;
+    let initialValue = props.initialValue || '';
 
-    React.useEffect(() => {
+    let [linkedinUrl, setLinkedinUrl] = React.useState(initialValue);
+
+    React.useEffect(function() {
         setLinkedinUrl(initialValue);
     }, [initialValue]);
 
@@ -12,15 +17,15 @@ export const UpdateLinkedIn = ({ isOpen, onClose, onConfirm, initialValue = '' }
         return null;
     }
 
-    const handleInputChange = (e) => {
+    function handleInputChange(e) {
         setLinkedinUrl(e.target.value);
-    };
+    }
 
-    const handleConfirm = () => {
+    function handleConfirm() {
         if (linkedinUrl) {
             onConfirm(linkedinUrl);
         }
-    };
+    }
 
     return (
         <Dialog
@@ -44,4 +49,4 @@ export const UpdateLinkedIn = ({ isOpen, onClose, onConfirm, initialValue = '' }
             onConfirm={handleConfirm}
         />
     );
-};
+}

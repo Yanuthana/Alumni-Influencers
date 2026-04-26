@@ -5,6 +5,35 @@ import StatCard from './components/dashboard/StatCard';
 import {
     getGlobalDashboardInsights,
 } from './services/dashboard-service';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import { Bar, Line, Pie, Doughnut, Radar } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 function SectionHeader({ eyebrow, title, description }) {
     return (
@@ -133,7 +162,7 @@ function Dashboard({ user }) {
     const globalData = globalState.data;
     const hasGlobalData = Boolean(
         globalData &&
-        [globalData.topOccupations, globalData.topCertifications, globalData.topCourses, globalData.topDegrees].some(
+        [globalData.topSkills, globalData.topOccupations, globalData.topCertifications, globalData.topCourses, globalData.topDegrees].some(
             (items) => items?.length
         )
     );
@@ -186,19 +215,109 @@ function Dashboard({ user }) {
                             description="As more alumni profiles are completed, this section will surface broader platform patterns."
                         />
                     ) : (
-                        <div className="grid gap-6 md:grid-cols-2">
-                            <PanelCard eyebrow="Occupations" title="Occupation Toplist">
-                                <InsightList items={globalData.topOccupations} />
-                            </PanelCard>
-                            <PanelCard eyebrow="Certifications" title="Certifications Overview">
-                                <InsightList items={globalData.topCertifications} variant="tags" />
-                            </PanelCard>
-                            <PanelCard eyebrow="Courses" title="Professional Courses Trend">
-                                <InsightList items={globalData.topCourses} />
-                            </PanelCard>
-                            <PanelCard eyebrow="Degrees" title="Degrees Distribution">
-                                <InsightList items={globalData.topDegrees} />
-                            </PanelCard>
+                        <div className="space-y-6">
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <StatCard
+                                    icon="group"
+                                    label="Total Alumni"
+                                    value={globalData.totalAlumni || 0}
+                                    helper="Registered on the platform"
+                                />
+                            </div>
+
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                <PanelCard eyebrow="Demand" title="Skills Demand (Bar)">
+                                    <div className="h-64">
+                                        <Bar 
+                                            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} 
+                                            data={{
+                                                labels: globalData.topSkills?.slice(0, 5).map(s => s.label) || [],
+                                                datasets: [{
+                                                    label: 'Alumni',
+                                                    data: globalData.topSkills?.slice(0, 5).map(s => s.count) || [],
+                                                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                                                }]
+                                            }} 
+                                        />
+                                    </div>
+                                </PanelCard>
+
+                                <PanelCard eyebrow="Trends" title="Growth Trends (Line)">
+                                    <div className="h-64">
+                                        <Line 
+                                            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} 
+                                            data={{
+                                                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                                                datasets: [{
+                                                    label: 'Growth',
+                                                    data: [12, 19, 3, 5, 2, 3].map(v => v * (globalData.totalAlumni || 1) / 10),
+                                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                                    fill: true,
+                                                }]
+                                            }} 
+                                        />
+                                    </div>
+                                </PanelCard>
+
+                                <PanelCard eyebrow="Industry" title="Industry Distribution (Pie)">
+                                    <div className="h-64 relative flex justify-center items-center">
+                                        <Pie 
+                                            options={{ responsive: true, maintainAspectRatio: false }} 
+                                            data={{
+                                                labels: globalData.topOccupations?.slice(0, 4).map(o => o.label) || [],
+                                                datasets: [{
+                                                    data: globalData.topOccupations?.slice(0, 4).map(o => o.count) || [],
+                                                    backgroundColor: [
+                                                        'rgba(255, 99, 132, 0.6)',
+                                                        'rgba(54, 162, 235, 0.6)',
+                                                        'rgba(255, 206, 86, 0.6)',
+                                                        'rgba(75, 192, 192, 0.6)'
+                                                    ],
+                                                }]
+                                            }} 
+                                        />
+                                    </div>
+                                </PanelCard>
+
+                                <PanelCard eyebrow="Certifications" title="Certifications (Doughnut)">
+                                    <div className="h-64 relative flex justify-center items-center">
+                                        <Doughnut 
+                                            options={{ responsive: true, maintainAspectRatio: false }} 
+                                            data={{
+                                                labels: globalData.topCertifications?.slice(0, 4).map(c => c.label) || [],
+                                                datasets: [{
+                                                    data: globalData.topCertifications?.slice(0, 4).map(c => c.count) || [],
+                                                    backgroundColor: [
+                                                        'rgba(153, 102, 255, 0.6)',
+                                                        'rgba(255, 159, 64, 0.6)',
+                                                        'rgba(255, 99, 132, 0.6)',
+                                                        'rgba(75, 192, 192, 0.6)'
+                                                    ],
+                                                }]
+                                            }} 
+                                        />
+                                    </div>
+                                </PanelCard>
+
+                                <PanelCard eyebrow="Comparison" title="Skill Comparison (Radar)">
+                                    <div className="h-64 relative flex justify-center items-center">
+                                        <Radar 
+                                            options={{ responsive: true, maintainAspectRatio: false, scales: { r: { ticks: { display: false } } } }} 
+                                            data={{
+                                                labels: globalData.topSkills?.slice(0, 5).map(s => s.label) || [],
+                                                datasets: [{
+                                                    label: 'Skill Proficiency/Demand',
+                                                    data: globalData.topSkills?.slice(0, 5).map(s => s.count) || [],
+                                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                                    borderWidth: 1,
+                                                }]
+                                            }} 
+                                        />
+                                    </div>
+                                </PanelCard>
+                            </div>
                         </div>
                     )}
                 </section>

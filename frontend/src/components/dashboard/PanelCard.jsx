@@ -1,7 +1,18 @@
-function PanelCard({ title, eyebrow, action, children, className = '' }) {
+function PanelCard(props) {
+  let title = props.title;
+  let eyebrow = props.eyebrow;
+  let action = props.action;
+  let children = props.children;
+  let className = props.className || '';
+
+  let hasHeader = false;
+  if (title || eyebrow || action) {
+    hasHeader = true;
+  }
+
   return (
     <section className={`rounded-[28px] border border-outline-variant/40 bg-gradient-to-br from-surface-container to-surface-container-high p-5 shadow-[0_18px_50px_rgba(0,0,0,0.24)] ${className}`}>
-      {(title || eyebrow || action) && (
+      {hasHeader ? (
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             {eyebrow ? (
@@ -13,7 +24,7 @@ function PanelCard({ title, eyebrow, action, children, className = '' }) {
           </div>
           {action ? <div>{action}</div> : null}
         </div>
-      )}
+      ) : null}
       {children}
     </section>
   );

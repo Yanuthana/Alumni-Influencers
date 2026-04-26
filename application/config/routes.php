@@ -83,6 +83,9 @@ $route['api/alumni/profile/image']['put']          = 'AlumniProfile/update_profi
 $route['api/alumni/profile/linkedin']['put']       = 'AlumniProfile/update_linkedin_url';
 $route['api/alumni/profile/completion-status']['get'] = 'AlumniProfile/update_completion_status';
 
+// Directory
+$route['api/alumni/directory']['get']              = 'AlumniDirectory/index';
+
 // Degrees 
 $route['api/alumni/degrees']['post']               = 'AlumniProfile/add_degrees';
 $route['api/alumni/degrees']['put']                = 'AlumniProfile/update_degrees';

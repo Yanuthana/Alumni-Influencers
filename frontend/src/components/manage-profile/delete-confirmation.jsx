@@ -1,8 +1,16 @@
 import React from 'react';
 import { Dialog } from '../dialog';
 
-export const DeleteConfirmation = ({ isOpen, onClose, onConfirm, itemName, itemType }) => {
-    if (!isOpen) return null;
+export function DeleteConfirmation(props) {
+    let isOpen = props.isOpen;
+    let onClose = props.onClose;
+    let onConfirm = props.onConfirm;
+    let itemName = props.itemName;
+    let itemType = props.itemType;
+
+    if (!isOpen) {
+        return null;
+    }
 
     return (
         <Dialog
@@ -19,4 +27,4 @@ export const DeleteConfirmation = ({ isOpen, onClose, onConfirm, itemName, itemT
             }
         />
     );
-};
+}

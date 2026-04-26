@@ -1,4 +1,10 @@
-export const Dialog = ({ title, description, onClose, onConfirm, input }) => {
+export function Dialog(props) {
+    let title = props.title;
+    let description = props.description;
+    let onClose = props.onClose;
+    let onConfirm = props.onConfirm;
+    let input = props.input;
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
             <div className="w-full max-w-md rounded-2xl border border-outline-variant/30 bg-surface-container-high p-5 shadow-2xl">

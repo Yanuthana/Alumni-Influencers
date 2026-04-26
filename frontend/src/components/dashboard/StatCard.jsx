@@ -1,24 +1,34 @@
 import React from 'react';
 
-function AnimatedValue({ value, suffix = '', prefix = '' }) {
-  const numericValue = Number(value) || 0;
-  const [displayValue, setDisplayValue] = React.useState(0);
+function AnimatedValue(props) {
+  let value = props.value;
+  let suffix = props.suffix || '';
+  let prefix = props.prefix || '';
 
-  React.useEffect(() => {
+  let numericValue = Number(value) || 0;
+  let [displayValue, setDisplayValue] = React.useState(0);
+
+  React.useEffect(function() {
     let frameId;
-    const duration = 700;
-    const start = performance.now();
+    let duration = 700;
+    let start = performance.now();
 
-    const tick = (now) => {
-      const progress = Math.min((now - start) / duration, 1);
+    function tick(now) {
+      let progress = (now - start) / duration;
+      if (progress > 1) {
+        progress = 1;
+      }
       setDisplayValue(Math.round(numericValue * progress));
       if (progress < 1) {
         frameId = window.requestAnimationFrame(tick);
       }
-    };
+    }
 
     frameId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(frameId);
+    
+    return function() {
+      window.cancelAnimationFrame(frameId);
+    };
   }, [numericValue]);
 
   return (
@@ -30,16 +40,16 @@ function AnimatedValue({ value, suffix = '', prefix = '' }) {
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  suffix = '',
-  prefix = '',
-  helper,
-  progress,
-  accent = 'from-primary/30 to-primary-container/50',
-}) {
+function StatCard(props) {
+  let icon = props.icon;
+  let label = props.label;
+  let value = props.value;
+  let suffix = props.suffix || '';
+  let prefix = props.prefix || '';
+  let helper = props.helper;
+  let progress = props.progress;
+  let accent = props.accent || 'from-primary/30 to-primary-container/50';
+
   return (
     <div className="group rounded-[24px] border border-outline-variant/40 bg-surface-container-low p-5 shadow-[0_16px_40px_rgba(0,0,0,0.18)] transition-transform duration-300 hover:-translate-y-1">
       <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${accent}`}>

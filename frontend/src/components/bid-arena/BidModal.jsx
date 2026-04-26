@@ -22,8 +22,12 @@ function BidModal({ isOpen, mode = 'place', slot, currentBid, onSubmit, onClose,
       setError('Please enter a valid bid amount.');
       return;
     }
+    if (mode === 'update' && currentBid && num < Number(currentBid)) {
+        setError(`Your updated bid cannot be less than your current bid of $${Number(currentBid).toLocaleString()}.`);
+        return;
+    }
     if (num < minBid) {
-      setError(`Your bid must be at least $${minBid.toLocaleString()}.`);
+        setError(`Your bid must be at least $${minBid.toLocaleString()}.`);
       return;
     }
     setError('');

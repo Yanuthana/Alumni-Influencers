@@ -1,7 +1,11 @@
 import React from 'react';
 import PanelCard from '../components/dashboard/PanelCard';
 
-function InfoRow({ label, value, icon }) {
+function InfoRow(props) {
+    let label = props.label;
+    let value = props.value;
+    let icon = props.icon;
+
     return (
         <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface-container-low border border-outline-variant/20 hover:border-primary/30 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -9,14 +13,27 @@ function InfoRow({ label, value, icon }) {
             </div>
             <div>
                 <p className="text-[11px] font-label uppercase tracking-widest text-secondary">{label}</p>
-                <p className="font-headline text-lg text-on-surface">{value || 'Not provided'}</p>
+                <p className="font-headline text-lg text-on-surface">{value ? value : 'Not provided'}</p>
             </div>
         </div>
     );
 }
 
-function ViewProfile({ user }) {
-    if (!user) return null;
+function ViewProfile(props) {
+    let user = props.user;
+
+    if (!user) {
+        return null;
+    }
+
+    let isVerified = user.is_verified;
+    let verifiedStatusText = 'No';
+    let verifiedIcon = 'error';
+
+    if (isVerified) {
+        verifiedStatusText = 'Yes';
+        verifiedIcon = 'verified';
+    }
 
     return (
         <main className="min-h-screen bg-surface pb-14 pt-28">
@@ -46,7 +63,7 @@ function ViewProfile({ user }) {
                         <div className="space-y-4">
                             <InfoRow label="User Role" value={user.role} icon="shield_person" />
                             <InfoRow label="Account ID" value={`#${user.user_id}`} icon="fingerprint" />
-                            <InfoRow label="Verified" value={user.is_verified ? 'Yes' : 'No'} icon={user.is_verified ? 'verified' : 'error'} />
+                            <InfoRow label="Verified" value={verifiedStatusText} icon={verifiedIcon} />
                         </div>
                     </PanelCard>
                 </div>

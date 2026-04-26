@@ -1,23 +1,27 @@
 import React from 'react';
 import { Dialog } from '../dialog';
 
-export const UpdateImage = ({ isOpen, onClose, onConfirm }) => {
-    const [file, setFile] = React.useState(null);
+export function UpdateImage(props) {
+    let isOpen = props.isOpen;
+    let onClose = props.onClose;
+    let onConfirm = props.onConfirm;
+
+    let [file, setFile] = React.useState(null);
 
     if (!isOpen) {
         return null;
     }
 
-    const handleInputChange = (e) => {
+    function handleInputChange(e) {
         setFile(e.target.value);
-    };
+    }
 
-    const handleConfirm = () => {
+    function handleConfirm() {
         if (file) {
             onConfirm(file);
             setFile('');
         }
-    };
+    }
 
     return (
         <Dialog
@@ -37,4 +41,4 @@ export const UpdateImage = ({ isOpen, onClose, onConfirm }) => {
             onConfirm={handleConfirm}
         />
     );
-};
+}

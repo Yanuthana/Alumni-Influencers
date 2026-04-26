@@ -1,6 +1,10 @@
 import React from 'react';
 
-function Home({ user, onPrimaryCta, onSecondaryCta }) {
+function Home(props) {
+  let user = props.user;
+  let onPrimaryCta = props.onPrimaryCta;
+  let onSecondaryCta = props.onSecondaryCta;
+
   return (
     <main className="min-h-screen flex flex-col">
       <section className="relative flex-1 flex items-center px-8 md:px-24 pt-24 overflow-hidden">

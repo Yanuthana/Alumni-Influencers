@@ -12,99 +12,121 @@ import ManageProfile from './pages/ManageProfile';
 import ViewProfile from './pages/ViewProfile';
 import ViewDocumentation from './pages/ViewDocumentation';
 import ApiKeyManagement from './pages/ApiKeyManagement';
+import AlumniDirectory from './pages/AlumniDirectory';
 import { toastConfig } from './config/toast-config';
 import { verifyEmail, logout } from './services/auth-service';
 
 function App() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [showSignup, setShowSignup] = React.useState(false);
-  const [showSignin, setShowSignin] = React.useState(false);
-  const [showForgotPassword, setShowForgotPassword] = React.useState(false);
-  const [prefilledEmail, setPrefilledEmail] = React.useState('');
-  const [showDropDown, setShowDropDown] = React.useState(false);
-  const [user, setUser] = React.useState(() => {
-    const savedUser = localStorage.getItem('user');
+  let location = useLocation();
+  let navigate = useNavigate();
+  
+  let [showSignup, setShowSignup] = React.useState(false);
+  let [showSignin, setShowSignin] = React.useState(false);
+  let [showForgotPassword, setShowForgotPassword] = React.useState(false);
+  let [prefilledEmail, setPrefilledEmail] = React.useState('');
+  let [showDropDown, setShowDropDown] = React.useState(false);
+  
+  function getInitialUser() {
+    let savedUser = localStorage.getItem('user');
     if (savedUser) {
       try {
-        return JSON.parse(savedUser);
-      } catch {
+        let parsedUser = JSON.parse(savedUser);
+        return parsedUser;
+      } catch (error) {
         localStorage.removeItem('user');
         return null;
       }
     }
     return null;
-  });
+  }
+  
+  let [user, setUser] = React.useState(getInitialUser());
+  let verificationStarted = React.useRef(false);
 
-  const verificationStarted = React.useRef(false);
+  React.useEffect(function() {
+    let urlParams = new URLSearchParams(location.search);
+    let token = urlParams.get('verify_token');
+    let email = urlParams.get('email');
 
-  React.useEffect(() => {
-
-    const urlParams = new URLSearchParams(location.search);
-    const token = urlParams.get('verify_token');
-    const email = urlParams.get('email');
-
-    if (token && !verificationStarted.current) {
-      verificationStarted.current = true;
-      const performVerification = async () => {
-        try {
-          const response = await verifyEmail(token);
-          if (response && response.status === 'success') {
-            toast.success('Email verified successfully! Please sign in.');
-            setPrefilledEmail(email || '');
-            setShowSignin(true);
-          } else {
-            toast.error(response.message || 'Verification failed.');
+    if (token) {
+      if (verificationStarted.current === false) {
+        verificationStarted.current = true;
+        
+        async function performVerification() {
+          try {
+            let response = await verifyEmail(token);
+            if (response && response.status === 'success') {
+              toast.success('Email verified successfully! Please sign in.');
+              if (email) {
+                setPrefilledEmail(email);
+              } else {
+                setPrefilledEmail('');
+              }
+              setShowSignin(true);
+            } else {
+              if (response.message) {
+                toast.error(response.message);
+              } else {
+                toast.error('Verification failed.');
+              }
+            }
+          } catch (err) {
+            toast.error('Verification failed due to a network error.');
+          } finally {
+            navigate(location.pathname, { replace: true });
           }
-        } catch (err) {
-          toast.error('Verification failed due to a network error.');
-        } finally {
-          // Clean up URL using router instead of window.history
-          navigate(location.pathname, { replace: true });
         }
-      };
-      performVerification();
+        performVerification();
+      }
     }
 
-    // Close dropdown on click outside
-    const handleClickOutside = (e) => {
-      if (showDropDown && !e.target.closest('.user-profile-dropdown')) {
-        setShowDropDown(false);
+    function handleClickOutside(e) {
+      if (showDropDown === true) {
+        if (!e.target.closest('.user-profile-dropdown')) {
+          setShowDropDown(false);
+        }
       }
-    };
+    }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    
+    return function() {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [location.pathname, location.search, showDropDown, navigate]);
 
-
-  const handleSignupClick = () => {
+  function handleSignupClick() {
     setShowSignin(false);
     setShowSignup(true);
-  };
+  }
 
-  const handleSigninClick = () => {
+  function handleSigninClick() {
     setShowSignup(false);
     setShowForgotPassword(false);
     setShowSignin(true);
-  };
-
-  const handleForgotPasswordClick = () => {
-    setShowSignin(false);
-    setShowForgotPassword(true);
-  };
-
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setShowSignin(false);
-    navigate('/dashboard');
-  };
-
-  const handleDropDown = () => {
-    setShowDropDown(!showDropDown);
   }
 
-  const handleLogout = async () => {
+  function handleForgotPasswordClick() {
+    setShowSignin(false);
+    setShowForgotPassword(true);
+  }
+
+  function handleLoginSuccess(userData) {
+    setUser(userData);
+    let userString = JSON.stringify(userData);
+    localStorage.setItem('user', userString);
+    setShowSignin(false);
+    navigate('/dashboard');
+  }
+
+  function handleDropDown() {
+    if (showDropDown === true) {
+      setShowDropDown(false);
+    } else {
+      setShowDropDown(true);
+    }
+  }
+
+  async function handleLogout() {
     try {
       await logout();
       localStorage.removeItem('api_token');
@@ -113,26 +135,53 @@ function App() {
       setShowDropDown(false);
       toast.success('Logged out successfully');
       navigate('/');
-    } catch {
+    } catch (error) {
       toast.error('Logout failed');
     }
-  };
+  }
 
-  const handlePrimaryCta = () => {
-    if (user) {
+  function handlePrimaryCta() {
+    if (user !== null) {
       navigate('/dashboard');
     } else {
       handleSigninClick();
     }
-  };
+  }
 
-  const handleSecondaryCta = () => {
-    if (user) {
+  function handleSecondaryCta() {
+    if (user !== null) {
       navigate('/dashboard');
     } else {
       handleSignupClick();
     }
-  };
+  }
+
+  function closeSignup() {
+    setShowSignup(false);
+  }
+
+  function closeSignin() {
+    setShowSignin(false);
+  }
+
+  function closeForgotPassword() {
+    setShowForgotPassword(false);
+  }
+
+  // Helper functions for checking roles
+  function isDeveloper() {
+    if (user && user.role && user.role.toLowerCase() === 'developer') {
+      return true;
+    }
+    return false;
+  }
+
+  function isAlumni() {
+    if (user && user.role && user.role.toLowerCase() === 'alumni') {
+      return true;
+    }
+    return false;
+  }
 
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary/30 min-h-screen">
@@ -146,10 +195,10 @@ function App() {
         onDropDownClick={handleDropDown}
       />
 
-      <SignupForm isOpen={showSignup} onClose={() => setShowSignup(false)} />
+      <SignupForm isOpen={showSignup} onClose={closeSignup} />
       <SigninForm
         isOpen={showSignin}
-        onClose={() => setShowSignin(false)}
+        onClose={closeSignin}
         initialEmail={prefilledEmail}
         onSignupClick={handleSignupClick}
         onLoginSuccess={handleLoginSuccess}
@@ -157,7 +206,7 @@ function App() {
       />
       <ForgotPasswordForm
         isOpen={showForgotPassword}
-        onClose={() => setShowForgotPassword(false)}
+        onClose={closeForgotPassword}
       />
 
       <Routes>
@@ -174,7 +223,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            user ? (
+            user !== null ? (
               <Dashboard user={user} />
             ) : (
               <Navigate replace to="/" />
@@ -184,8 +233,18 @@ function App() {
         <Route
           path="/bid-arena"
           element={
-            user ? (
+            user !== null ? (
               <BidArena user={user} />
+            ) : (
+              <Navigate replace to="/" />
+            )
+          }
+        />
+        <Route
+          path="/alumni-view"
+          element={
+            user !== null ? (
+              <AlumniDirectory user={user} />
             ) : (
               <Navigate replace to="/" />
             )
@@ -194,7 +253,7 @@ function App() {
         <Route
           path="/manage-profile"
           element={
-            user?.role?.toLowerCase() === 'alumni' ? (
+            isAlumni() ? (
               <ManageProfile user={user} setUser={setUser} />
             ) : (
               <Navigate replace to="/" />
@@ -204,7 +263,7 @@ function App() {
         <Route
           path="/view-profile"
           element={
-            user ? (
+            user !== null ? (
               <ViewProfile user={user} />
             ) : (
               <Navigate replace to="/" />
@@ -214,7 +273,7 @@ function App() {
         <Route
           path="/docs"
           element={
-            user?.role?.toLowerCase() === 'developer' ? (
+            isDeveloper() ? (
               <ViewDocumentation />
             ) : (
               <Navigate replace to="/" />
@@ -224,19 +283,17 @@ function App() {
         <Route
           path="/api-keys"
           element={
-            user?.role?.toLowerCase() === 'developer' ? (
+            isDeveloper() ? (
               <ApiKeyManagement />
             ) : (
               <Navigate replace to="/" />
             )
           }
         />
-        {/* Fallback route to prevent black screen on unknown paths */}
         <Route path="*" element={<Navigate replace to="/" />} />
       </Routes>
     </div>
   );
 }
-
 
 export default App;

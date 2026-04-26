@@ -2,18 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { login } from '../services/auth-service';
 import toast from 'react-hot-toast';
 
-function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLoginSuccess, onForgotPasswordClick }) {
-  const initialFormState = {
+function SigninForm(props) {
+  let isOpen = props.isOpen;
+  let onClose = props.onClose;
+  let initialEmail = props.initialEmail || '';
+  let onSignupClick = props.onSignupClick;
+  let onLoginSuccess = props.onLoginSuccess;
+  let onForgotPasswordClick = props.onForgotPasswordClick;
+
+  let initialFormState = {
     email: initialEmail,
     password: ''
   };
 
-  const [formData, setFormData] = useState(initialFormState);
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  let [formData, setFormData] = useState(initialFormState);
+  let [errors, setErrors] = useState({});
+  let [isLoading, setIsLoading] = useState(false);
+  let [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
+  useEffect(function() {
     if (isOpen) {
       setFormData({
           email: initialEmail,
@@ -24,14 +31,16 @@ function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLogin
   }, [isOpen, initialEmail]);
 
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
-  const validate = () => {
+  function validate() {
     let newErrors = {};
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
         newErrors.email = 'Please enter a valid university email';
       }
@@ -40,15 +49,21 @@ function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLogin
       newErrors.password = 'Password is required';
     }
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    let keys = Object.keys(newErrors);
+    if (keys.length === 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (validate()) {
+    let isValid = validate();
+    if (isValid) {
       setIsLoading(true);
       try {
-        const response = await login(formData);
+        let response = await login(formData);
         if (response && response.status === 'success') {
           toast.success('Welcome back! Login successful.');
           // Store token if necessary
@@ -63,7 +78,11 @@ function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLogin
             onClose();
           }
         } else {
-          toast.error(response.message || 'Invalid email or password.');
+          if (response.message) {
+            toast.error(response.message);
+          } else {
+            toast.error('Invalid email or password.');
+          }
         }
       } catch (error) {
         toast.error('An unexpected error occurred. Please try again later.');
@@ -71,21 +90,48 @@ function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLogin
         setIsLoading(false);
       }
     }
-  };
+  }
 
-  const handleSignupToggle = (e) => {
+  function handleSignupToggle(e) {
     e.preventDefault();
     if (onSignupClick) {
       onSignupClick();
     }
-  };
+  }
     
+  function handleChange(e) {
+    let id = e.target.id;
+    let value = e.target.value;
+    
+    setFormData(function(prev) {
+      let newData = { ...prev };
+      newData[id] = value;
+      return newData;
+    });
+    
+    if (errors[id]) {
+      setErrors(function(prev) {
+        let newErrors = { ...prev };
+        newErrors[id] = '';
+        return newErrors;
+      });
+    }
+  }
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
-    if (errors[id]) setErrors(prev => ({ ...prev, [id]: '' }));
-  };
+  function handleForgotPasswordClick(e) {
+    e.preventDefault();
+    if (onForgotPasswordClick) {
+      onForgotPasswordClick();
+    }
+  }
+
+  function togglePassword() {
+    if (showPassword === true) {
+      setShowPassword(false);
+    } else {
+      setShowPassword(true);
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -111,7 +157,7 @@ function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLogin
                 className={`w-full bg-surface-container-low border ${errors.email ? 'border-error' : 'border-outline-variant/30'} rounded-lg px-4 py-2.5 outline-none focus:border-primary transition-colors text-on-surface`}
                 placeholder="john.doe@westminster.ac.uk"
               />
-              {errors.email && <p className="text-xs text-error font-label">{errors.email}</p>}
+              {errors.email ? <p className="text-xs text-error font-label">{errors.email}</p> : null}
             </div>
 
             <div className="space-y-2">
@@ -119,12 +165,7 @@ function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLogin
                 <label className="text-sm font-label text-secondary" htmlFor="password">Password</label>
                 <button 
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (onForgotPasswordClick) {
-                      onForgotPasswordClick();
-                    }
-                  }}
+                  onClick={handleForgotPasswordClick}
                   className="text-xs text-primary hover:underline font-label"
                 >
                   Forgot password?
@@ -140,7 +181,7 @@ function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLogin
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={togglePassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -149,7 +190,7 @@ function SigninForm({ isOpen, onClose, initialEmail = '', onSignupClick, onLogin
                   </span>
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-error font-label">{errors.password}</p>}
+              {errors.password ? <p className="text-xs text-error font-label">{errors.password}</p> : null}
             </div>
 
             <div className="pt-4">

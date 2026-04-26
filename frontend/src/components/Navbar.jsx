@@ -1,16 +1,50 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-function Navbar({ onSignupClick, onSigninClick, user, onLogout, showDropDown, onDropDownClick }) {
-  const baseLinkClass = "font-headline tracking-tight transition-colors";
-  const desktopNavLinks = [
+function Navbar(props) {
+  let onSignupClick = props.onSignupClick;
+  let onSigninClick = props.onSigninClick;
+  let user = props.user;
+  let onLogout = props.onLogout;
+  let showDropDown = props.showDropDown;
+  let onDropDownClick = props.onDropDownClick;
+
+  let baseLinkClass = "font-headline tracking-tight transition-colors";
+  let desktopNavLinks = [
     { label: 'Home', to: '/', requiresAuth: false },
     { label: 'Dashboard', to: '/dashboard', requiresAuth: true },
+    { label: 'Alumni Directory', to: '/alumni-view', requiresAuth: true },
     { label: 'Manage Profile', to: '/manage-profile', requiresAuth: true, alumniOnly: true },
     { label: 'Bid Arena', to: '/bid-arena', requiresAuth: true },
     { label: 'Docs', to: '/docs', requiresAuth: true, developerOnly: true },
     { label: 'API Keys', to: '/api-keys', requiresAuth: true, developerOnly: true },
   ];
+
+  let visibleLinks = [];
+  for (let i = 0; i < desktopNavLinks.length; i++) {
+    let item = desktopNavLinks[i];
+    let shouldShow = true;
+    
+    if (item.requiresAuth && !user) {
+      shouldShow = false;
+    }
+    
+    if (item.alumniOnly) {
+      if (!user || !user.role || user.role.toLowerCase() !== 'alumni') {
+        shouldShow = false;
+      }
+    }
+    
+    if (item.developerOnly) {
+      if (!user || !user.role || user.role.toLowerCase() !== 'developer') {
+        shouldShow = false;
+      }
+    }
+    
+    if (shouldShow) {
+      visibleLinks.push(item);
+    }
+  }
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl shadow-2xl shadow-black/40">
@@ -20,31 +54,32 @@ function Navbar({ onSignupClick, onSigninClick, user, onLogout, showDropDown, on
             Westminster Regent
           </NavLink>
         </div>
-        {user && (
+        
+        {user ? (
           <div className="hidden md:flex items-center space-x-8">
-            {desktopNavLinks
-              .filter((item) => {
-                if (item.requiresAuth && !user) return false;
-                if (item.alumniOnly && user?.role?.toLowerCase() !== 'alumni') return false;
-                if (item.developerOnly && user?.role?.toLowerCase() !== 'developer') return false;
-                return true;
-              })
-              .map((item) => (
+            {visibleLinks.map(function(item) {
+              return (
                 <NavLink
                   key={item.label}
                   to={item.to}
-                  className={({ isActive }) =>
-                    `${baseLinkClass} ${isActive ? 'text-primary' : 'text-[#c6c6c6] hover:text-[#e5e2e1]'}`
-                  }
+                  className={function({ isActive }) {
+                    if (isActive) {
+                      return baseLinkClass + " text-primary";
+                    } else {
+                      return baseLinkClass + " text-[#c6c6c6] hover:text-[#e5e2e1]";
+                    }
+                  }}
                 >
                   {item.label}
                 </NavLink>
-              ))}
+              );
+            })}
           </div>
-        )}
+        ) : null}
+
         <div className="flex items-center space-x-6">
           {!user ? (
-            <>
+            <React.Fragment>
               <button
                 className="font-headline tracking-tight text-[#c6c6c6] hover:text-[#e5e2e1] transition-colors active:scale-95"
                 onClick={onSigninClick}
@@ -57,7 +92,7 @@ function Navbar({ onSignupClick, onSigninClick, user, onLogout, showDropDown, on
               >
                 Sign Up
               </button>
-            </>
+            </React.Fragment>
           ) : (
             <div className="relative user-profile-dropdown">
               <div
@@ -72,26 +107,26 @@ function Navbar({ onSignupClick, onSigninClick, user, onLogout, showDropDown, on
                 </span>
               </div>
 
-                  {showDropDown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-surface-container-high border border-outline-variant/30 rounded-lg shadow-2xl py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <NavLink
-                        to="/view-profile"
-                        onClick={onDropDownClick}
-                        className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-on-surface hover:bg-surface-variant transition-colors text-left"
-                      >
-                        <span className="material-symbols-outlined text-primary text-lg">account_circle</span>
-                        <span className="font-headline font-medium text-sm">View Profile</span>
-                      </NavLink>
-                      <div className="h-px bg-outline-variant/30 mx-2 my-1"></div>
-                      <button
-                        onClick={onLogout}
-                        className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-on-surface hover:bg-surface-variant transition-colors text-left"
-                      >
-                        <span className="material-symbols-outlined text-error text-lg">logout</span>
-                        <span className="font-headline font-medium text-sm">Logout</span>
-                      </button>
-                    </div>
-                  )}
+              {showDropDown ? (
+                <div className="absolute right-0 mt-2 w-48 bg-surface-container-high border border-outline-variant/30 rounded-lg shadow-2xl py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <NavLink
+                    to="/view-profile"
+                    onClick={onDropDownClick}
+                    className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-on-surface hover:bg-surface-variant transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-primary text-lg">account_circle</span>
+                    <span className="font-headline font-medium text-sm">View Profile</span>
+                  </NavLink>
+                  <div className="h-px bg-outline-variant/30 mx-2 my-1"></div>
+                  <button
+                    onClick={onLogout}
+                    className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-on-surface hover:bg-surface-variant transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-error text-lg">logout</span>
+                    <span className="font-headline font-medium text-sm">Logout</span>
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
         </div>

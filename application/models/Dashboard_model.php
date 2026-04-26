@@ -10,7 +10,7 @@ class Dashboard_model extends CI_Model
 
     public function getPersonalInsights($userId)
     {
-        $this->db->select('a.alumni_id, a.is_active_winner, ap.degrees, ap.certifications, ap.professional_courses, ap.employment_history, ap.licenses');
+        $this->db->select('a.alumni_id, a.is_active_winner, ap.degrees, ap.certifications, ap.professional_courses, ap.employment_history, ap.licenses, ap.profile_image, ap.linkedin_url');
         $this->db->from('alumni a');
         $this->db->join('alumni_profiles ap', 'ap.alumni_id = a.alumni_id', 'left');
         $this->db->where('a.user_id', $userId);
@@ -57,6 +57,8 @@ class Dashboard_model extends CI_Model
                 'employmentHistory' => $history,
                 'licenses' => $licenses,
             ],
+            'profile_image' => $profile['profile_image'] ?? null,
+            'linkedin_url' => $profile['linkedin_url'] ?? null,
             'biddingStats' => [
                 'wins' => $wins,
                 'totalBids' => $totalBids,
@@ -70,11 +72,54 @@ class Dashboard_model extends CI_Model
     public function getGlobalInsights()
     {
         return [
+            'totalAlumni' => (int) $this->db->count_all('alumni'),
+            'topSkills' => $this->extractGlobalTopSkills(6),
             'topOccupations' => $this->aggregateOccupations(6),
             'topCertifications' => $this->aggregateJsonColumn('certifications', 6, 'name'),
             'topCourses' => $this->aggregateCourses(6),
             'topDegrees' => $this->aggregateJsonColumn('degrees', 6, 'title'),
         ];
+    }
+
+    private function extractGlobalTopSkills($limit = 6)
+    {
+        $profiles = $this->db->select('degrees, certifications, professional_courses, employment_history')->get('alumni_profiles')->result_array();
+        $all_counts = [];
+
+        $keywords = [
+            'React', 'Next.js', 'JavaScript', 'TypeScript', 'Java', 'PHP', 'Python',
+            'Data Science', 'Cloud', 'AWS', 'DevOps', 'AI', 'Machine Learning',
+            'Project Management', 'Business Analysis', 'Leadership', 'Finance', 'BSc', 'IT', 'Analyst'
+        ];
+
+        foreach ($profiles as $profile) {
+            $sources = array_merge(
+                $this->decodeJsonList($profile['degrees'] ?? null),
+                $this->decodeJsonList($profile['certifications'] ?? null),
+                $this->decodeJsonList($profile['professional_courses'] ?? null),
+                $this->decodeJsonList($profile['employment_history'] ?? null)
+            );
+
+            foreach ($sources as $source) {
+                $text = is_array($source) ? implode(' ', array_values($source)) : (string) $source;
+                $matched = false;
+                foreach ($keywords as $keyword) {
+                    if (stripos($text, $keyword) !== false) {
+                        $all_counts[$keyword] = ($all_counts[$keyword] ?? 0) + 1;
+                        $matched = true;
+                    }
+                }
+
+                if (!$matched) {
+                    $fallback = $this->normalizeLabel($text);
+                    if ($fallback !== '') {
+                        $all_counts[$fallback] = ($all_counts[$fallback] ?? 0) + 1;
+                    }
+                }
+            }
+        }
+
+        return $this->formatCounts($all_counts, $limit);
     }
 
     private function countMonthlyBidWins($alumniId)

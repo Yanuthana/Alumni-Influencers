@@ -2,6 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH . 'core/BaseApiController.php';
+
 use OpenApi\Annotations as OA;
 
 use Firebase\JWT\JWT;
@@ -168,9 +169,9 @@ class Auth extends BaseApiController
         $this->_load_email();
         // Since the frontend is a separate app (usually on port 5173 during dev),
         // we point the verification link to the frontend home page with query params.
-        $frontend_url = 'http://localhost:5173/'; 
+        $frontend_url = 'http://localhost:5173/';
         $verification_link = $frontend_url . '?verify_token=' . $token . '&email=' . urlencode($d['email']);
-        
+
         $name        = htmlspecialchars($d['first_name']);
         $this->email->from('no-reply@alumni-influencers.com', 'Alumni Influencers');
         $this->email->to($d['email']);
@@ -430,7 +431,7 @@ class Auth extends BaseApiController
         ]);
     }
 
-  
+
     /**
      * @OA\Post(
      *     path="/api/auth/password/otp/verify",

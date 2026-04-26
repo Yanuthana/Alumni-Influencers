@@ -6,10 +6,10 @@ function Navbar({ onSignupClick, onSigninClick, user, onLogout, showDropDown, on
   const desktopNavLinks = [
     { label: 'Home', to: '/', requiresAuth: false },
     { label: 'Dashboard', to: '/dashboard', requiresAuth: true },
+    { label: 'Manage Profile', to: '/manage-profile', requiresAuth: true, alumniOnly: true },
     { label: 'Bid Arena', to: '/bid-arena', requiresAuth: true },
-    { label: 'Mentorship', to: '/', requiresAuth: false },
-    { label: 'Knowledge Hub', to: '/', requiresAuth: false },
-    { label: 'Events', to: '/', requiresAuth: false },
+    { label: 'Docs', to: '/docs', requiresAuth: true, developerOnly: true },
+    { label: 'API Keys', to: '/api-keys', requiresAuth: true, developerOnly: true },
   ];
 
   return (
@@ -20,21 +20,28 @@ function Navbar({ onSignupClick, onSigninClick, user, onLogout, showDropDown, on
             Westminster Regent
           </NavLink>
         </div>
-        <div className="hidden md:flex items-center space-x-8">
-          {desktopNavLinks
-            .filter((item) => !item.requiresAuth || user)
-            .map((item) => (
-              <NavLink
-                key={item.label}
-                to={item.to}
-                className={({ isActive }) =>
-                  `${baseLinkClass} ${isActive ? 'text-primary' : 'text-[#c6c6c6] hover:text-[#e5e2e1]'}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-        </div>
+        {user && (
+          <div className="hidden md:flex items-center space-x-8">
+            {desktopNavLinks
+              .filter((item) => {
+                if (item.requiresAuth && !user) return false;
+                if (item.alumniOnly && user?.role?.toLowerCase() !== 'alumni') return false;
+                if (item.developerOnly && user?.role?.toLowerCase() !== 'developer') return false;
+                return true;
+              })
+              .map((item) => (
+                <NavLink
+                  key={item.label}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `${baseLinkClass} ${isActive ? 'text-primary' : 'text-[#c6c6c6] hover:text-[#e5e2e1]'}`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+          </div>
+        )}
         <div className="flex items-center space-x-6">
           {!user ? (
             <>
@@ -65,17 +72,26 @@ function Navbar({ onSignupClick, onSigninClick, user, onLogout, showDropDown, on
                 </span>
               </div>
 
-              {showDropDown && (
-                <div className="absolute right-0 mt-2 w-40 bg-surface-container-high border border-outline-variant/30 rounded-lg shadow-2xl py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <button
-                    onClick={onLogout}
-                    className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-on-surface hover:bg-surface-variant transition-colors text-left"
-                  >
-                    <span className="material-symbols-outlined text-error text-lg">logout</span>
-                    <span className="font-headline font-medium text-sm">Logout</span>
-                  </button>
-                </div>
-              )}
+                  {showDropDown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-surface-container-high border border-outline-variant/30 rounded-lg shadow-2xl py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <NavLink
+                        to="/view-profile"
+                        onClick={onDropDownClick}
+                        className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-on-surface hover:bg-surface-variant transition-colors text-left"
+                      >
+                        <span className="material-symbols-outlined text-primary text-lg">account_circle</span>
+                        <span className="font-headline font-medium text-sm">View Profile</span>
+                      </NavLink>
+                      <div className="h-px bg-outline-variant/30 mx-2 my-1"></div>
+                      <button
+                        onClick={onLogout}
+                        className="w-full flex items-center space-x-2.5 px-3.5 py-2 text-on-surface hover:bg-surface-variant transition-colors text-left"
+                      >
+                        <span className="material-symbols-outlined text-error text-lg">logout</span>
+                        <span className="font-headline font-medium text-sm">Logout</span>
+                      </button>
+                    </div>
+                  )}
             </div>
           )}
         </div>

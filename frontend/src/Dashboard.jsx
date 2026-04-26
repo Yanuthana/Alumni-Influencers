@@ -1,9 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import PanelCard from './components/dashboard/PanelCard';
 import StatCard from './components/dashboard/StatCard';
 import {
     getGlobalDashboardInsights,
-    getPersonalDashboardInsights,
 } from './services/dashboard-service';
 
 function SectionHeader({ eyebrow, title, description }) {
@@ -40,40 +40,7 @@ function ErrorState({ title, message }) {
     );
 }
 
-function ProgressRing({ value }) {
-    const safeValue = Math.max(0, Math.min(100, Number(value) || 0));
-    const circumference = 2 * Math.PI * 52;
-    const strokeDashoffset = circumference - (safeValue / 100) * circumference;
 
-    return (
-        <div className="relative flex h-40 w-40 items-center justify-center">
-            <svg className="h-40 w-40 -rotate-90" viewBox="0 0 140 140">
-                <circle cx="70" cy="70" r="52" fill="transparent" stroke="rgba(255,255,255,0.08)" strokeWidth="12" />
-                <circle
-                    cx="70"
-                    cy="70"
-                    r="52"
-                    fill="transparent"
-                    stroke="url(#progressGradient)"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                    strokeWidth="12"
-                />
-                <defs>
-                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#ffb0c9" />
-                        <stop offset="100%" stopColor="#8b004b" />
-                    </linearGradient>
-                </defs>
-            </svg>
-            <div className="absolute text-center">
-                <p className="font-headline text-4xl text-on-surface">{safeValue}%</p>
-                <p className="text-xs uppercase tracking-[0.24em] text-secondary">Ready</p>
-            </div>
-        </div>
-    );
-}
 
 function InsightList({ items, variant = 'bars' }) {
     if (!items?.length) {
@@ -122,12 +89,9 @@ function InsightList({ items, variant = 'bars' }) {
 }
 
 function Dashboard({ user }) {
+    const navigate = useNavigate();
     const isAlumni = String(user?.role || '').toLowerCase() === 'alumni';
-    const [personalState, setPersonalState] = React.useState({
-        data: null,
-        error: '',
-        loading: isAlumni,
-    });
+
     const [globalState, setGlobalState] = React.useState({
         data: null,
         error: '',
@@ -138,26 +102,7 @@ function Dashboard({ user }) {
         let isMounted = true;
 
         if (isAlumni) {
-            setPersonalState({ data: null, error: '', loading: true });
-            getPersonalDashboardInsights()
-                .then((data) => {
-                    if (!isMounted) {
-                        return;
-                    }
-                    setPersonalState({ data, error: '', loading: false });
-                })
-                .catch((error) => {
-                    if (!isMounted) {
-                        return;
-                    }
-                    setPersonalState({
-                        data: null,
-                        error: error.message || 'Failed to load personal insights.',
-                        loading: false,
-                    });
-                });
-        } else {
-            setPersonalState({ data: null, error: '', loading: false });
+
         }
 
         setGlobalState({ data: null, error: '', loading: true });
@@ -184,7 +129,7 @@ function Dashboard({ user }) {
         };
     }, [isAlumni, user?.user_id]);
 
-    const personalData = personalState.data;
+
     const globalData = globalState.data;
     const hasGlobalData = Boolean(
         globalData &&
@@ -207,7 +152,7 @@ function Dashboard({ user }) {
                             </h1>
                             <p className="mt-4 max-w-3xl text-sm leading-7 text-secondary md:text-base">
                                 {isAlumni
-                                    ? 'Your workspace blends personal performance signals with platform-wide opportunities so you can act on both your progress and the broader alumni market.'
+                                    ? 'This workspace focuses on platform-wide signals and ecosystem trends. Visit your dedicated profile section for detailed personal performance and record management.'
                                     : 'This workspace highlights platform-wide signals and ecosystem trends tailored for non-alumni roles without exposing personal alumni bidding data.'}
                             </p>
                         </div>
@@ -216,229 +161,14 @@ function Dashboard({ user }) {
                                 <p className="text-xs uppercase tracking-[0.22em] text-secondary">Role</p>
                                 <p className="mt-2 font-headline text-2xl capitalize text-on-surface">{user?.role || 'member'}</p>
                             </div>
-                            <div className="rounded-2xl border border-outline-variant/35 bg-black/20 px-4 py-3">
-                                <p className="text-xs uppercase tracking-[0.22em] text-secondary">Access</p>
-                                <p className="mt-2 font-headline text-2xl text-on-surface">
-                                    {isAlumni ? 'Personal + Global' : 'Global Only'}
-                                </p>
-                            </div>
                         </div>
                     </div>
                 </section>
-
-                {isAlumni ? (
-                    <section className="mb-12">
-                        <SectionHeader
-                            eyebrow="Personal Insights"
-                            title="Your profile and bidding momentum"
-                            description="These widgets are rendered only for alumni users and combine your completion status, skill signals, and bidding outcomes."
-                        />
-
-                        {personalState.loading ? (
-                            <div className="space-y-6">
-                                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                                    <SkeletonCard className="h-44" />
-                                    <SkeletonCard className="h-44" />
-                                    <SkeletonCard className="h-44" />
-                                    <SkeletonCard className="h-44" />
-                                </div>
-                                <div className="grid gap-6 xl:grid-cols-[1.7fr_1fr]">
-                                    <SkeletonCard className="h-96" />
-                                    <SkeletonCard className="h-96" />
-                                </div>
-                            </div>
-                        ) : personalState.error ? (
-                            <ErrorState title="Personal insights unavailable" message={personalState.error} />
-                        ) : !personalData ? (
-                            <EmptyState
-                                title="No personal data available"
-                                description="Complete your profile and participate in bidding to unlock personal analytics."
-                            />
-                        ) : (
-                            <div className="space-y-6">
-                                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                                    <StatCard
-                                        icon="groups"
-                                        label="Total Alumni"
-                                        value={personalData.totalAlumni}
-                                        helper="Platform context metric"
-                                        accent="from-primary/35 to-secondary-container/70"
-                                    />
-                                    <StatCard
-                                        icon="check_circle"
-                                        label="Profile Completion"
-                                        value={personalData.profileCompletion}
-                                        suffix="%"
-                                        helper="Based on your core profile sections"
-                                        progress={personalData.profileCompletion}
-                                        accent="from-primary/35 to-primary-container/80"
-                                    />
-                                    <StatCard
-                                        icon="military_tech"
-                                        label="Monthly Bid Wins"
-                                        value={personalData.monthlyBidWins}
-                                        helper="Won bids recorded this month"
-                                        accent="from-primary/35 to-[#5f163d]"
-                                    />
-                                    <StatCard
-                                        icon="bolt"
-                                        label="Active Bidders"
-                                        value={personalData.activeBidders}
-                                        helper="System-wide market activity"
-                                        accent="from-secondary-container/60 to-surface-bright"
-                                    />
-                                </div>
-
-                                <div className="grid gap-6 xl:grid-cols-[1.7fr_1fr]">
-                                    <PanelCard
-                                        eyebrow="Skills Pulse"
-                                        title="Personal Skills Panel"
-                                        action={<button className="text-xs font-label uppercase tracking-[0.24em] text-primary">Strongest focus</button>}
-                                    >
-                                        {personalData.skills?.length ? (
-                                            <InsightList items={personalData.skills} />
-                                        ) : (
-                                            <p className="text-secondary">No personal data available</p>
-                                        )}
-                                    </PanelCard>
-
-                                    <PanelCard eyebrow="Completion" title="Profile Strength">
-                                        <div className="flex flex-col items-center gap-6">
-                                            <ProgressRing value={personalData.profileCompletion} />
-                                            <div className="w-full space-y-3">
-                                                {[
-                                                    ['Education', personalData.profileBreakdown?.education],
-                                                    ['Certifications', personalData.profileBreakdown?.certifications],
-                                                    ['Licenses', personalData.profileBreakdown?.licenses],
-                                                    ['Experience', personalData.profileBreakdown?.experience],
-                                                    ['Professional Courses', personalData.profileBreakdown?.professionalCourses],
-                                                ].map(([label, complete]) => (
-                                                    <div key={label} className="flex items-center justify-between rounded-2xl bg-surface-container-low px-4 py-3">
-                                                        <span className="text-sm text-on-surface">{label}</span>
-                                                        <span className={`material-symbols-outlined text-lg ${complete ? 'text-tertiary' : 'text-secondary/60'}`}>
-                                                            {complete ? 'check_circle' : 'radio_button_unchecked'}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <button className="w-full rounded-2xl murrey-gradient px-5 py-3 font-headline text-lg text-on-primary transition-transform hover:-translate-y-0.5">
-                                                Complete Profile
-                                            </button>
-                                        </div>
-                                    </PanelCard>
-                                </div>
-
-                                <section className="mt-12">
-                                    <SectionHeader
-                                        eyebrow="Verification"
-                                        title="Detailed Profile Records"
-                                        description="Direct records retrieved from your verified alumni profile."
-                                    />
-                                    <div className="grid gap-6 md:grid-cols-2">
-                                        <PanelCard eyebrow="Education" title="Degrees & Qualifications">
-                                            {personalData.detailedProfile?.degrees?.length > 0 ? (
-                                                <div className="space-y-4">
-                                                    {personalData.detailedProfile.degrees.map((deg, index) => (
-                                                        <div key={index} className="border-l-2 border-primary/30 pl-4 py-1">
-                                                            <p className="font-headline text-lg text-on-surface">{deg.title}</p>
-                                                            <p className="text-sm text-secondary">{deg.institution} • {deg.year}</p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : <p className="text-secondary italic">No degree records found.</p>}
-                                        </PanelCard>
-
-                                        <PanelCard eyebrow="Credentials" title="Certifications">
-                                            {personalData.detailedProfile?.certifications?.length > 0 ? (
-                                                <div className="flex flex-wrap gap-2">
-                                                    {personalData.detailedProfile.certifications.map((cert, index) => (
-                                                        <div key={index} className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 w-full">
-                                                            <div className="flex items-center gap-3">
-                                                                <span className="material-symbols-outlined text-primary">verified</span>
-                                                                <div>
-                                                                    <p className="font-headline text-on-surface">{cert.name}</p>
-                                                                    <p className="text-xs text-secondary">{cert.issuer} • {cert.year}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : <p className="text-secondary italic">No certifications recorded.</p>}
-                                        </PanelCard>
-
-                                        <PanelCard eyebrow="Learning" title="Professional Courses">
-                                            {personalData.detailedProfile?.professionalCourses?.length > 0 ? (
-                                                <div className="space-y-3">
-                                                    {personalData.detailedProfile.professionalCourses.map((course, index) => (
-                                                        <div key={index} className="flex justify-between items-center rounded-2xl bg-black/20 p-4">
-                                                            <div>
-                                                                <p className="text-on-surface font-medium">{course.name}</p>
-                                                                <p className="text-xs text-secondary">{course.provider}</p>
-                                                            </div>
-                                                            <span className="text-xs font-label text-primary">{course.year}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : <p className="text-secondary italic">No professional courses found.</p>}
-                                        </PanelCard>
-
-                                        <PanelCard eyebrow="Career" title="Employment History">
-                                            {personalData.detailedProfile?.employmentHistory?.length > 0 ? (
-                                                <div className="space-y-4">
-                                                    {personalData.detailedProfile.employmentHistory.map((job, index) => (
-                                                        <div key={index} className="relative pl-6 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-px before:bg-outline-variant/30">
-                                                            <div className="absolute left-[-4px] top-2 h-2 w-2 rounded-full bg-primary" />
-                                                            <p className="font-headline text-on-surface">{job.position}</p>
-                                                            <p className="text-sm text-secondary">{job.company || job.employer}</p>
-                                                            <p className="text-xs text-secondary/60 mt-1">{job.years || job.period}</p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : <p className="text-secondary italic">No employment history found.</p>}
-                                        </PanelCard>
-                                    </div>
-                                </section>
-
-                                <PanelCard eyebrow="Performance" title="Personal Bidding Performance">
-                                    <div className="grid gap-4 md:grid-cols-3">
-                                        <StatCard
-                                            icon="emoji_events"
-                                            label="Wins"
-                                            value={personalData.biddingStats?.wins || 0}
-                                            helper="All recorded winning bids"
-                                        />
-                                        <StatCard
-                                            icon="gavel"
-                                            label="Total Bids"
-                                            value={personalData.biddingStats?.totalBids || 0}
-                                            helper="Participations across slots"
-                                            accent="from-secondary-container/60 to-surface-bright"
-                                        />
-                                        <StatCard
-                                            icon="monitoring"
-                                            label="Win Rate"
-                                            value={personalData.biddingStats?.winRate || 0}
-                                            suffix="%"
-                                            helper={
-                                                personalData.biddingStats?.activeWinner
-                                                    ? 'You are currently marked as an active winner'
-                                                    : 'Keep bidding to improve your conversion'
-                                            }
-                                            progress={personalData.biddingStats?.winRate || 0}
-                                            accent="from-primary/35 to-[#5f163d]"
-                                        />
-                                    </div>
-                                </PanelCard>
-                            </div>
-                        )}
-                    </section>
-                ) : null}
 
                 <section>
                     <SectionHeader
                         eyebrow="Global Insights"
                         title="Platform-wide alumni intelligence"
-                        description="Visible to every logged-in user. These widgets summarize occupations, certifications, courses, and degree distributions across the wider alumni ecosystem."
                     />
 
                     {globalState.loading ? (

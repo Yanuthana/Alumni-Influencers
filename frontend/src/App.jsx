@@ -8,6 +8,10 @@ import Navbar from './components/Navbar';
 import Dashboard from './Dashboard';
 import BidArena from './pages/BidArena';
 import Home from './pages/Home';
+import ManageProfile from './pages/ManageProfile';
+import ViewProfile from './pages/ViewProfile';
+import ViewDocumentation from './pages/ViewDocumentation';
+import ApiKeyManagement from './pages/ApiKeyManagement';
 import { toastConfig } from './config/toast-config';
 import { verifyEmail, logout } from './services/auth-service';
 
@@ -19,20 +23,22 @@ function App() {
   const [showForgotPassword, setShowForgotPassword] = React.useState(false);
   const [prefilledEmail, setPrefilledEmail] = React.useState('');
   const [showDropDown, setShowDropDown] = React.useState(false);
-  const [user, setUser] = React.useState(null);
+  const [user, setUser] = React.useState(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch {
+        localStorage.removeItem('user');
+        return null;
+      }
+    }
+    return null;
+  });
 
   const verificationStarted = React.useRef(false);
 
   React.useEffect(() => {
-    // Check for logged in user
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem('user');
-      }
-    }
 
     const urlParams = new URLSearchParams(location.search);
     const token = urlParams.get('verify_token');
@@ -180,6 +186,46 @@ function App() {
           element={
             user ? (
               <BidArena user={user} />
+            ) : (
+              <Navigate replace to="/" />
+            )
+          }
+        />
+        <Route
+          path="/manage-profile"
+          element={
+            user?.role?.toLowerCase() === 'alumni' ? (
+              <ManageProfile user={user} setUser={setUser} />
+            ) : (
+              <Navigate replace to="/" />
+            )
+          }
+        />
+        <Route
+          path="/view-profile"
+          element={
+            user ? (
+              <ViewProfile user={user} />
+            ) : (
+              <Navigate replace to="/" />
+            )
+          }
+        />
+        <Route
+          path="/docs"
+          element={
+            user?.role?.toLowerCase() === 'developer' ? (
+              <ViewDocumentation />
+            ) : (
+              <Navigate replace to="/" />
+            )
+          }
+        />
+        <Route
+          path="/api-keys"
+          element={
+            user?.role?.toLowerCase() === 'developer' ? (
+              <ApiKeyManagement />
             ) : (
               <Navigate replace to="/" />
             )

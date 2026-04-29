@@ -49,55 +49,6 @@ class  ViewWinner extends BaseApiController
     }
 
 
-    /**
-     * @OA\Get(
-     *     path="/api/featured-alumni",
-     *     summary="View the daily featured alumni",
-     *     tags={"Featured Alumni"},
-     *     security={{"apiKeyAuth": {}}},
-     *     @OA\Parameter(name="slot_id", in="query", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Winner found"),
-     *     @OA\Response(response=404, description="No winner for this slot")
-     * )
-     */
-    // public function view_winner()
-    // {
-    //     $this->_require_api_key();
-
-    //     if (!$this->_is_from_kong() && !$this->_allow_non_kong_request()) {
-    //         $this->_respond(403, [
-    //             'status'  => 'error',
-    //             'message' => 'Forbidden: request must pass through Kong gateway (or provide valid gateway_key outside Kong)',
-    //         ]);
-    //     }
-
-    //     $slotIdRaw = $this->input->get('slot_id', true);
-    //     $slotId = filter_var($slotIdRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-
-    //     if ($slotId === false) {
-    //         $this->_respond(400, [
-    //             'status'  => 'error',
-    //             'message' => 'slot_id query parameter is required and must be a positive integer',
-    //         ]);
-    //     }
-
-    //     $result = $this->slotresult_model->view_winner($slotId);
-
-    //     if ($result['status']) {
-    //         $this->_respond(200, [
-    //             'status'  => 'success',
-    //             'message' => $result['message'],
-    //             'data'    => $result['data'],
-    //         ]);
-    //     } else {
-    //         $this->_respond(404, [
-    //             'status'  => 'error',
-    //             'message' => $result['message'],
-    //         ]);
-    //     }
-    // }
-
-
     public function view_winner()
     {
         $this->_require_api_key();

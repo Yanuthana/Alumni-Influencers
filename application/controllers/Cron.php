@@ -21,7 +21,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property SlotResult_model $slotresult_model
  * @property Bidding_model    $bidding_model
  */
-class Cron extends CI_Controller {
+class Cron extends CI_Controller
+{
 
     /**
      * Must match the cron_key query parameter sent by the cron job.
@@ -29,7 +30,8 @@ class Cron extends CI_Controller {
      */
     private $CRON_SECRET;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->CRON_SECRET = getenv('CRON_SECRET');
         $this->load->model('slotresult_model');
@@ -57,7 +59,8 @@ class Cron extends CI_Controller {
      *     @OA\Response(response=403, description="Invalid cron key")
      * )
      */
-    public function winner_selection() {
+    public function winner_selection()
+    {
         // Verify shared secret (works for both CLI and HTTP cron calls)
         $key = $this->input->get('cron_key');
 
@@ -71,7 +74,7 @@ class Cron extends CI_Controller {
         }
 
         $timestamp = date('Y-m-d H:i:s');
-        
+
         // 1) Predict winner for TODAY'S slot (ending at 18:00)
         $winnerResult = $this->slotresult_model->predict_winner();
 
@@ -89,7 +92,8 @@ class Cron extends CI_Controller {
             'winner_selection' => [
                 'status'  => $winnerResult['status'] ? 'success' : 'error',
                 'message' => $winnerResult['message'],
-                'data'    => $winnerResult['data'] ?? null
+                'processed_count' => $winnerResult['processed_count'] ?? 0,
+                'results' => $winnerResult['details'] ?? null
             ],
             'slot_automation' => [
                 'status'  => 'success',

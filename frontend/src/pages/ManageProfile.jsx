@@ -361,9 +361,8 @@ function ManageProfile({ user, setUser }) {
 
                 {state.loading ? (
                     <div className="space-y-6">
-                        <div className="grid gap-6 xl:grid-cols-[1fr_1.7fr]">
-                            <SkeletonCard className="h-96" />
-                            <SkeletonCard className="h-96" />
+                        <div className="flex justify-center">
+                            <SkeletonCard className="h-[500px] w-full max-w-2xl" />
                         </div>
                     </div>
                 ) : state.error ? (
@@ -390,39 +389,30 @@ function ManageProfile({ user, setUser }) {
                             </div>
                         )}
 
-                        <div className="grid gap-6 xl:grid-cols-[1fr_1.7fr]">
-                            <PanelCard eyebrow="Completion" title="Profile Strength">
-                                <div className="flex flex-col items-center gap-6">
-                                    <ProgressRing value={data.profileCompletion} />
-                                    <div className="w-full space-y-3">
-                                        {[
-                                            ['Education', data.profileBreakdown?.education],
-                                            ['Certifications', data.profileBreakdown?.certifications],
-                                            ['Licenses', data.profileBreakdown?.licenses],
-                                            ['Experience', data.profileBreakdown?.experience],
-                                            ['Professional Courses', data.profileBreakdown?.professionalCourses],
-                                        ].map(([label, complete]) => (
-                                            <div key={label} className="flex items-center justify-between rounded-2xl bg-surface-container-low px-4 py-3">
-                                                <span className="text-sm text-on-surface">{label}</span>
-                                                <span className={`material-symbols-outlined text-lg ${complete ? 'text-tertiary' : 'text-secondary/60'}`}>
-                                                    {complete ? 'check_circle' : 'radio_button_unchecked'}
-                                                </span>
-                                            </div>
-                                        ))}
+                        <div className="flex justify-center">
+                            <div className="w-full max-w-2xl">
+                                <PanelCard eyebrow="Completion" title="Profile Strength">
+                                    <div className="flex flex-col items-center gap-6">
+                                        <ProgressRing value={data.profileCompletion} />
+                                        <div className="w-full space-y-3">
+                                            {[
+                                                ['Education', data.profileBreakdown?.education],
+                                                ['Certifications', data.profileBreakdown?.certifications],
+                                                ['Licenses', data.profileBreakdown?.licenses],
+                                                ['Experience', data.profileBreakdown?.experience],
+                                                ['Professional Courses', data.profileBreakdown?.professionalCourses],
+                                            ].map(([label, complete]) => (
+                                                <div key={label} className="flex items-center justify-between rounded-2xl bg-surface-container-low px-4 py-3">
+                                                    <span className="text-sm text-on-surface">{label}</span>
+                                                    <span className={`material-symbols-outlined text-lg ${complete ? 'text-tertiary' : 'text-secondary/60'}`}>
+                                                        {complete ? 'check_circle' : 'radio_button_unchecked'}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            </PanelCard>
-
-                            <PanelCard
-                                eyebrow="Skills Pulse"
-                                title="Personal Skills Panel"
-                            >
-                                {data.skills?.length ? (
-                                    <InsightList items={data.skills} />
-                                ) : (
-                                    <p className="text-secondary">No personal skill data available yet.</p>
-                                )}
-                            </PanelCard>
+                                </PanelCard>
+                            </div>
                         </div>
 
                         <section>

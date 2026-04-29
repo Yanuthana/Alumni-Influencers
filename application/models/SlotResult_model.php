@@ -9,9 +9,6 @@ class SlotResult_model extends CI_Model
         parent::__construct();
     }
 
-    // ---------------------------------------------------------------
-    // HELPER
-    // ---------------------------------------------------------------
 
     /**
      * Returns the alumni_id for a given user_id, or false if not found.
@@ -173,11 +170,60 @@ class SlotResult_model extends CI_Model
     }
 
     /**
-     * Backward-compatible wrapper: selects winners for today's slot_date.
+     * Finds and processes all slots up to TODAY that are missing results.
+     * This ensures the system catches up if a cron job is missed (e.g. server downtime).
+     *
+     * @return array
+     */
+    public function predict_pending_winners(): array
+    {
+        $today = date('Y-m-d');
+
+        // Find slots on or before today that don't have a result record yet
+        $this->db->select('s.slot_date');
+        $this->db->from('Slot s');
+        $this->db->join('Slot_Result sr', 'sr.slot_id = s.slot_id', 'left');
+        $this->db->where('s.slot_date <=', $today);
+        $this->db->where('sr.result_id IS NULL', null, false);
+        $this->db->order_by('s.slot_date', 'ASC');
+        
+        $pendingSlots = $this->db->get()->result_array();
+
+        if (empty($pendingSlots)) {
+            return [
+                'status' => true,
+                'message' => 'No pending slots found to process',
+                'processed_count' => 0,
+                'details' => []
+            ];
+        }
+
+        $overallResults = [];
+        $successCount = 0;
+
+        foreach ($pendingSlots as $row) {
+            $date = $row['slot_date'];
+            $result = $this->predict_winners_for_date($date);
+            $overallResults[$date] = $result;
+            if ($result['status']) {
+                $successCount++;
+            }
+        }
+
+        return [
+            'status' => $successCount > 0,
+            'message' => "Processed {$successCount} of " . count($pendingSlots) . " pending slots",
+            'processed_count' => count($pendingSlots),
+            'details' => $overallResults
+        ];
+    }
+
+    /**
+     * Backward-compatible wrapper: now triggers catch-up for all pending slots.
      */
     public function predict_winner(): array
     {
-        return $this->predict_winners_for_date(date('Y-m-d'));
+        return $this->predict_pending_winners();
     }
 
 

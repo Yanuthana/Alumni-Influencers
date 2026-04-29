@@ -70,7 +70,7 @@ function InfoChip({ icon, children, href }) {
 function FeaturedAlumniSection({ winner, loading }) {
     if (loading) {
         return (
-            <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+            <section id="featured-alumni-section" className="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 lg:px-8">
                 <SectionHeader
                     eyebrow="Daily Spotlight"
                     title="Featured Alumni"
@@ -126,7 +126,7 @@ function FeaturedAlumniSection({ winner, loading }) {
     }
 
     return (
-        <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+        <section id="featured-alumni-section" className="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             <SectionHeader
                 eyebrow="Alumni Excellence"
                 title="Featured Alumni of the Day"
@@ -331,9 +331,15 @@ function Home(props) {
                         </button>
                         <button
                             className="border border-outline-variant/30 text-on-surface px-8 py-4 rounded-md font-headline text-xl hover:bg-surface-container-high transition-all active:scale-95"
-                            onClick={onSecondaryCta}
+                            onClick={() => {
+                                if (user) {
+                                    document.getElementById('featured-alumni-section')?.scrollIntoView({ behavior: 'smooth' });
+                                } else {
+                                    onSecondaryCta();
+                                }
+                            }}
                         >
-                            {user ? 'View Platform Insights' : 'Explore the Network'}
+                            {user ? 'View Alumni' : 'Explore the Network'}
                         </button>
                     </div>
                 </div>

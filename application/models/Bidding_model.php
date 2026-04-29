@@ -150,7 +150,7 @@ class Bidding_model extends CI_Model
 
             // Insert into the Bids table
             if ($this->db->insert('Bid', $data)) {
-                return ['status' => true, 'message' => 'Bid placed successfully','bid_id'=>$this->db->insert_id()];
+                return ['status' => true, 'message' => 'Bid placed successfully', 'bid_id' => $this->db->insert_id()];
             }
         }
 
@@ -198,7 +198,7 @@ class Bidding_model extends CI_Model
 
 
         $this->db->where('bid_id', $bidId);
-        $this->db->update('Bid', ['bid_amount' => $bidAmount,'status'=>'ACTIVE','updated_at'=>date('Y-m-d H:i:s')]);
+        $this->db->update('Bid', ['bid_amount' => $bidAmount, 'status' => 'ACTIVE', 'updated_at' => date('Y-m-d H:i:s')]);
 
         return ['status' => true, 'message' => 'Bid updated successfully'];
     }
@@ -270,6 +270,12 @@ class Bidding_model extends CI_Model
             'message' => 'Bidding history fetched successfully',
             'data' => $query->result_array()
         ];
+    }
+
+    public function get_slot_by_date($date)
+    {
+        $query = $this->db->get_where('Slot', ['slot_date' => $date]);
+        return $query->row_array();
     }
 }
 

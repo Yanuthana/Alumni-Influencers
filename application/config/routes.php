@@ -118,6 +118,7 @@ $route['api/alumni/monthly-limit-status']['get']   = 'SlotResult/monthly_limit_s
 // /api/slots
 // -------------------------
 $route['api/slots']['get']                         = 'BiddingSystem/view_slots';
+$route['api/slots/by-date']['post']                = 'BiddingSystem/get_slot_by_date';
 
 $route['api/slots/result']['get']                  = 'SlotResult/slot_result';
 

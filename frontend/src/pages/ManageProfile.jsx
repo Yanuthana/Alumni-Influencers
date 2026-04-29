@@ -96,7 +96,7 @@ function ProgressRing({ value }) {
     );
 }
 
-function InsightList({ items, onUpdate, onDelete }) {
+function InsightList({ items }) {
     if (!items?.length) {
         return <p className="text-secondary">No items available yet.</p>;
     }
@@ -105,20 +105,11 @@ function InsightList({ items, onUpdate, onDelete }) {
 
     return (
         <div className="space-y-4">
-            {items.map((item, index) => (
+            {items.map((item) => (
                 <div key={item.label} className="group">
                     <div className="mb-2 flex items-center justify-between gap-3 text-sm">
                         <div className="flex items-center gap-2">
                             <span className="text-on-surface">{item.label}</span>
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button 
-                                    onClick={() => onDelete?.('Skill', item, index)}
-                                    className="p-1 rounded-lg hover:bg-error/10 text-error transition-colors" 
-                                    title="Delete Skill"
-                                >
-                                    <span className="material-symbols-outlined text-xs">delete</span>
-                                </button>
-                            </div>
                         </div>
                         <span className="text-secondary">
                             {item.provider ? `${item.provider} • ` : ''}
@@ -425,21 +416,9 @@ function ManageProfile({ user, setUser }) {
                             <PanelCard
                                 eyebrow="Skills Pulse"
                                 title="Personal Skills Panel"
-                                action={
-                                    <button 
-                                        onClick={() => handleUpdate('Skill')}
-                                        className="text-xs font-label uppercase tracking-[0.24em] text-primary hover:text-primary-light transition-colors"
-                                    >
-                                        Update Skills
-                                    </button>
-                                }
                             >
                                 {data.skills?.length ? (
-                                    <InsightList 
-                                        items={data.skills} 
-                                        onUpdate={handleUpdate}
-                                        onDelete={handleDelete}
-                                    />
+                                    <InsightList items={data.skills} />
                                 ) : (
                                     <p className="text-secondary">No personal skill data available yet.</p>
                                 )}

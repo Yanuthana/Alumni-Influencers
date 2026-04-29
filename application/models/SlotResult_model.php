@@ -1,7 +1,8 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class SlotResult_model extends CI_Model {
+class SlotResult_model extends CI_Model
+{
 
     public function __construct()
     {
@@ -15,7 +16,8 @@ class SlotResult_model extends CI_Model {
     /**
      * Returns the alumni_id for a given user_id, or false if not found.
      */
-    private function getAlumniId($user_id) {
+    private function getAlumniId($user_id)
+    {
         $row = $this->db->get_where('alumni', ['user_id' => $user_id])->row_array();
         return $row ? $row['alumni_id'] : false;
     }
@@ -178,12 +180,13 @@ class SlotResult_model extends CI_Model {
         return $this->predict_winners_for_date(date('Y-m-d'));
     }
 
- 
+
     /**
      * Increment the win count for an alumni in the current month/year.
      * Inserts a new record if one doesn't exist yet.
      */
-    private function _incrementMonthlyWinCount($alumniId) {
+    private function _incrementMonthlyWinCount($alumniId)
+    {
         $month = (int) date('m');
         $year  = (int) date('Y');
 
@@ -219,7 +222,8 @@ class SlotResult_model extends CI_Model {
      * @param int $alumniId
      * @return bool  true = limit reached (cannot bid), false = can still bid
      */
-    public function hasReachedMonthlyLimit($alumniId) {
+    public function hasReachedMonthlyLimit($alumniId)
+    {
         $month = (int) date('m');
         $year  = (int) date('Y');
 
@@ -239,7 +243,8 @@ class SlotResult_model extends CI_Model {
     /**
      * Get the result (winner details) for a specific slot.
      */
-    public function get_slot_result($slotId) {
+    public function get_slot_result($slotId)
+    {
         $this->db->select('Slot_Result.result_id, Slot_Result.slot_id, Slot_Result.winning_bid_id, Slot_Result.selected_at,
                            Bid.bid_amount, Bid.alumni_id,
                            alumni.alumni_id, 
@@ -288,7 +293,8 @@ class SlotResult_model extends CI_Model {
     /**
      * Return monthly win limit status for the authenticated alumni.
      */
-    public function get_monthly_limit_status($userId) {
+    public function get_monthly_limit_status($userId)
+    {
         $alumniId = $this->getAlumniId($userId);
         if (!$alumniId) {
             return ['status' => false, 'message' => 'Alumni account not found'];

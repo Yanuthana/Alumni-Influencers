@@ -6,33 +6,33 @@ import {
     getGlobalDashboardInsights,
 } from './services/dashboard-service';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  RadialLinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    ArcElement,
+    RadialLinearScale,
+    Title,
+    Tooltip,
+    Legend,
+    Filler,
 } from 'chart.js';
 import { Bar, Line, Pie, Doughnut, Radar } from 'react-chartjs-2';
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  RadialLinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    ArcElement,
+    RadialLinearScale,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
 );
 
 function SectionHeader({ eyebrow, title, description }) {
@@ -130,9 +130,6 @@ function Dashboard({ user }) {
     React.useEffect(() => {
         let isMounted = true;
 
-        if (isAlumni) {
-
-        }
 
         setGlobalState({ data: null, error: '', loading: true });
         getGlobalDashboardInsights()
@@ -228,8 +225,8 @@ function Dashboard({ user }) {
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 <PanelCard eyebrow="Demand" title="Skills Demand (Bar)">
                                     <div className="h-64">
-                                        <Bar 
-                                            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} 
+                                        <Bar
+                                            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }}
                                             data={{
                                                 labels: globalData.topSkills?.slice(0, 5).map(s => s.label) || [],
                                                 datasets: [{
@@ -237,15 +234,15 @@ function Dashboard({ user }) {
                                                     data: globalData.topSkills?.slice(0, 5).map(s => s.count) || [],
                                                     backgroundColor: 'rgba(255, 99, 132, 0.6)',
                                                 }]
-                                            }} 
+                                            }}
                                         />
                                     </div>
                                 </PanelCard>
 
                                 <PanelCard eyebrow="Trends" title="Growth Trends (Line)">
                                     <div className="h-64">
-                                        <Line 
-                                            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} 
+                                        <Line
+                                            options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }}
                                             data={{
                                                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                                                 datasets: [{
@@ -255,15 +252,15 @@ function Dashboard({ user }) {
                                                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                                                     fill: true,
                                                 }]
-                                            }} 
+                                            }}
                                         />
                                     </div>
                                 </PanelCard>
 
                                 <PanelCard eyebrow="Industry" title="Industry Distribution (Pie)">
                                     <div className="h-64 relative flex justify-center items-center">
-                                        <Pie 
-                                            options={{ responsive: true, maintainAspectRatio: false }} 
+                                        <Pie
+                                            options={{ responsive: true, maintainAspectRatio: false }}
                                             data={{
                                                 labels: globalData.topOccupations?.slice(0, 4).map(o => o.label) || [],
                                                 datasets: [{
@@ -275,15 +272,15 @@ function Dashboard({ user }) {
                                                         'rgba(75, 192, 192, 0.6)'
                                                     ],
                                                 }]
-                                            }} 
+                                            }}
                                         />
                                     </div>
                                 </PanelCard>
 
                                 <PanelCard eyebrow="Certifications" title="Certifications (Doughnut)">
                                     <div className="h-64 relative flex justify-center items-center">
-                                        <Doughnut 
-                                            options={{ responsive: true, maintainAspectRatio: false }} 
+                                        <Doughnut
+                                            options={{ responsive: true, maintainAspectRatio: false }}
                                             data={{
                                                 labels: globalData.topCertifications?.slice(0, 4).map(c => c.label) || [],
                                                 datasets: [{
@@ -295,15 +292,15 @@ function Dashboard({ user }) {
                                                         'rgba(75, 192, 192, 0.6)'
                                                     ],
                                                 }]
-                                            }} 
+                                            }}
                                         />
                                     </div>
                                 </PanelCard>
 
                                 <PanelCard eyebrow="Comparison" title="Skill Comparison (Radar)">
                                     <div className="h-64 relative flex justify-center items-center">
-                                        <Radar 
-                                            options={{ responsive: true, maintainAspectRatio: false, scales: { r: { ticks: { display: false } } } }} 
+                                        <Radar
+                                            options={{ responsive: true, maintainAspectRatio: false, scales: { r: { ticks: { display: false } } } }}
                                             data={{
                                                 labels: globalData.topSkills?.slice(0, 5).map(s => s.label) || [],
                                                 datasets: [{
@@ -313,7 +310,7 @@ function Dashboard({ user }) {
                                                     borderColor: 'rgba(255, 99, 132, 1)',
                                                     borderWidth: 1,
                                                 }]
-                                            }} 
+                                            }}
                                         />
                                     </div>
                                 </PanelCard>

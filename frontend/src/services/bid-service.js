@@ -28,6 +28,19 @@ export const getSlots = async (userId) => {
 };
 
 /**
+ * POST /api/slots/by-date?user_id=<id>
+ * Body: { slot_date }
+ */
+export const getSlotByDate = async (userId, slotDate) => {
+  const response = await fetch(`/api/slots/by-date?user_id=${userId}`, {
+    method: 'POST',
+    headers: baseHeaders(),
+    body: JSON.stringify({ slot_date: slotDate }),
+  });
+  return parseResponse(response);
+};
+
+/**
  * POST /api/bids?user_id=<id>
  * Body: { slot_id, bid_amount }
  */

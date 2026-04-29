@@ -109,13 +109,6 @@ class Dashboard_model extends CI_Model
                         $matched = true;
                     }
                 }
-
-                if (!$matched) {
-                    $fallback = $this->normalizeLabel($text);
-                    if ($fallback !== '') {
-                        $all_counts[$fallback] = ($all_counts[$fallback] ?? 0) + 1;
-                    }
-                }
             }
         }
 
@@ -254,13 +247,6 @@ class Dashboard_model extends CI_Model
                 if (stripos($text, $keyword) !== false) {
                     $counts[$keyword] = ($counts[$keyword] ?? 0) + 1;
                     $matched = true;
-                }
-            }
-
-            if (!$matched) {
-                $fallback = $this->normalizeLabel($text);
-                if ($fallback !== '') {
-                    $counts[$fallback] = ($counts[$fallback] ?? 0) + 1;
                 }
             }
         }

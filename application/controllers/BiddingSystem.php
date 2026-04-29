@@ -294,4 +294,47 @@ class BiddingSystem extends BaseApiController
             ]);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/slots/by-date",
+     *     summary="Get slot details by date",
+     *     tags={"Bidding System"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"slot_date"},
+     *             @OA\Property(property="slot_date", type="string", format="date", example="2026-04-26")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Slot details"),
+     *     @OA\Response(response=404, description="Slot not found")
+     * )
+     */
+    public function get_slot_by_date()
+    {
+        $d = $this->_json_body();
+        $date = $d['slot_date'] ?? null;
+
+        if (!$date) {
+            $this->_respond(400, [
+                'status' => 'error',
+                'message' => 'slot_date is required in payload'
+            ]);
+        }
+
+        $slot = $this->bidding_model->get_slot_by_date($date);
+
+        if ($slot) {
+            $this->_respond(200, [
+                'status'  => 'success',
+                'message' => 'Slot details fetched successfully',
+                'data'    => $slot
+            ]);
+        } else {
+            $this->_respond(404, [
+                'status'  => 'error',
+                'message' => 'No slot found for date: ' . $date
+            ]);
+        }
+    }
 }

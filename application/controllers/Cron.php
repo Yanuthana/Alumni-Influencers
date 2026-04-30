@@ -4,6 +4,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 /**
  * Cron Controller - runs daily tasks
  */
+use OpenApi\Annotations as OA;
+
+/**
+ * @OA\Tag(
+ *     name="Cron",
+ *     description="Endpoints for automated system tasks (e.g., daily winner selection)"
+ * )
+ */
 class Cron extends CI_Controller
 {
     private $CRON_SECRET;
@@ -15,6 +23,17 @@ class Cron extends CI_Controller
         $this->load->model('slotresult_model');
         $this->load->model('bidding_model');
     }
+
+    /**
+     * @OA\Get(
+     *     path="/cron/winner_selection",
+     *     summary="Trigger daily winner selection and slot generation",
+     *     tags={"Cron"},
+     *     @OA\Parameter(name="cron_key", in="query", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Tasks executed successfully"),
+     *     @OA\Response(response=403, description="Invalid cron key")
+     * )
+     */
 
     // Handles picking a winner and making new slots at 6 PM
     public function winner_selection()

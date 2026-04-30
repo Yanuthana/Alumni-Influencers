@@ -7,7 +7,11 @@ require_once APPPATH . 'core/BaseApiController.php';
 use OpenApi\Annotations as OA;
 
 /**
- * Controller for alumni profile stuff
+ * @OA\Tag(
+ *     name="Alumni Profile",
+ *     description="Endpoints for managing alumni professional profiles"
+ * )
+ * @property AlumniProfile_model $profile_model
  */
 class AlumniProfile extends BaseApiController{
     public function __construct()
@@ -28,7 +32,22 @@ class AlumniProfile extends BaseApiController{
         return $user_id;
     }
 
-    // Gets the profile for a user
+    /**
+     * @OA\Get(
+     *     path="/api/alumni/profile",
+     *     summary="Get alumni profile",
+     *     tags={"Alumni Profile"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Profile not found")
+     * )
+     */
     public function get_profile(){
         $user_id = $this->_get_user_id();
       
@@ -41,7 +60,22 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200,['status'=>'success','data'=>$profile]);
     }
 
-    // Updates profile picture
+    /**
+     * @OA\Put(
+     *     path="/api/alumni/profile/image",
+     *     summary="Update profile image",
+     *     tags={"Alumni Profile"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="profile_image_url", type="string", example="http://example.com/image.jpg")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Updated"),
+     *     @OA\Response(response=400, description="Invalid input")
+     * )
+     */
     public function update_profile_image()
     {
         $user_id = $this->_get_user_id();
@@ -59,7 +93,22 @@ class AlumniProfile extends BaseApiController{
     
     }
 
-    // Updates LinkedIn link
+    /**
+ * @OA\Put(
+ *     path="/api/alumni/profile/linkedin",
+ *     summary="Update LinkedIn URL",
+ *     tags={"Alumni Profile"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="linkedin_url", type="string", example="https://linkedin.com/in/johndoe")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Updated"),
+ *     @OA\Response(response=400, description="Invalid input")
+ * )
+ */
     public function update_linkedin_url()
     {
         $user_id = $this->_get_user_id();
@@ -76,23 +125,6 @@ class AlumniProfile extends BaseApiController{
         return $this->_respond(200,['status'=>'success','data'=>$profile]);
     
     }
-
-    /**
- * @OA\Post(
- *     path="/api/alumni/degrees",
- *     summary="Add a new degree",
- *     tags={"Alumni Profile"},
- *     security={{"bearerAuth": {}}},
- *     @OA\Parameter(name="user_id", in="query", required=true, @OA\Schema(type="integer")),
- *     @OA\RequestBody(
- *         @OA\JsonContent(
- *             @OA\Property(property="degree", type="string", example="BSc Computer Science")
- *         )
- *     ),
- *     @OA\Response(response=200, description="Added"),
- *     @OA\Response(response=400, description="Invalid input")
- * )
- */
     public function add_degrees(){
         $user_id = $this->_get_user_id();
         $d= $this->_json_body();

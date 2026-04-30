@@ -3,6 +3,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH . 'core/BaseApiController.php';
 
+use OpenApi\Annotations as OA;
+
+/**
+ * @OA\Tag(
+ *     name="Dashboard",
+ *     description="Endpoints for fetching alumni insights and statistics"
+ * )
+ */
 class DashboardAnalytics extends BaseApiController
 {
     public function __construct()
@@ -10,6 +18,18 @@ class DashboardAnalytics extends BaseApiController
         parent::__construct();
         $this->load->model('Dashboard_model', 'dashboard_model');
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/dashboard/personal",
+     *     summary="Get personal dashboard insights",
+     *     tags={"Dashboard"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Personal insights returned"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=404, description="No data found")
+     * )
+     */
 
     public function personal()
     {
@@ -31,6 +51,16 @@ class DashboardAnalytics extends BaseApiController
         ]);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/dashboard/global",
+     *     summary="Get global dashboard insights",
+     *     tags={"Dashboard"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Global insights returned"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function global()
     {
         $this->_require_authenticated_user();

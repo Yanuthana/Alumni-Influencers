@@ -31,12 +31,21 @@ The project uses Mailtrap for testing emails in the development environment. You
 
 ## 🤖 Automation (Cron Jobs)
 
-The daily winner selection is handled by a cron job. You can manually trigger it using:
+The daily winner selection and slot automation are handled by a cron job. You can manually trigger it using:
+
 ```bash
-php index.php cron select_winner
+# Using the bootstrap script (Recommended for CLI)
+/Applications/XAMPP/xamppfiles/bin/php /Applications/XAMPP/xamppfiles/htdocs/Alumni-Influencers/cron_winner.php
+
+# Or via native CodeIgniter CLI
+php index.php cron winner_selection
 ```
-Or via the web:
-`http://your-domain/cron/select_winner`
+
+### Crontab Configuration
+To automate this, add the following line to your crontab (`crontab -e`):
+```bash
+0 18 * * * /Applications/XAMPP/xamppfiles/bin/php /Applications/XAMPP/xamppfiles/htdocs/Alumni-Influencers/cron_winner.php >> /tmp/alumni_winner_cron.log 2>&1
+```
 
 ## 🔒 Kong API Gateway Setup
 

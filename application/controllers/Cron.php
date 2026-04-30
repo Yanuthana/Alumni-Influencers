@@ -9,10 +9,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * parameter so that external callers cannot trigger it accidentally.
  *
  * Cron job (6:00 PM every day):
- *   0 18 * * * curl -s "http://localhost/Alumni-Influencers/api/cron/winner_selection?cron_key=CRON_SECRET_KEY_CHANGE_ME" >> /tmp/alumni_cron.log 2>&1
+ *   0 18 * * * curl -s "http://localhost/Alumni-Influencers/api/cron/winner_selection?cron_key=CRON_SECRET_KEY_CHANGE_ME" >> /tmp/alumni_winner_cron.log 2>&1
  *
  * Or via PHP CLI (no web server needed):
- *   0 18 * * * /Applications/XAMPP/xamppfiles/bin/php /Applications/XAMPP/xamppfiles/htdocs/Alumni-Influencers/cron_winner.php >> /tmp/alumni_cron.log 2>&1
+ *   0 18 * * * /Applications/XAMPP/xamppfiles/bin/php /Applications/XAMPP/xamppfiles/htdocs/Alumni-Influencers/cron_winner.php >> /tmp/alumni_winner_cron.log 2>&1
  *
  * @OA\Tag(
  *     name="Cron Jobs",
@@ -75,11 +75,9 @@ class Cron extends CI_Controller
 
         $timestamp = date('Y-m-d H:i:s');
 
-        // 1) Predict winner for TODAY'S slot (ending at 18:00)
-        $winnerResult = $this->slotresult_model->predict_winner();
-
-        // 2) Automate Slot Creation for FUTURE slots
-        // We ensure slots for the next 7 days exist to be safe and give alumni time to bid.
+        // 1) Automate Slot Creation for TODAY and FUTURE slots
+        // We ensure slots for the next 7 days exist. This must happen BEFORE winner selection
+        // so that today's slot exists in the database even if it was never created manually.
         $slotsCreated = [];
         for ($i = 0; $i <= 7; $i++) {
             $futureDate = date('Y-m-d', strtotime("+$i days"));
@@ -87,18 +85,21 @@ class Cron extends CI_Controller
             $slotsCreated[] = $futureDate;
         }
 
+        // 2) Predict winner for TODAY'S slot (and any pending past slots)
+        $winnerResult = $this->slotresult_model->predict_winner();
+
         $response = [
             'executed_at' => $timestamp,
+            'slot_automation' => [
+                'status'  => 'success',
+                'message' => 'Verified/Created slots for the next 7 days',
+                'dates'   => $slotsCreated
+            ],
             'winner_selection' => [
                 'status'  => $winnerResult['status'] ? 'success' : 'error',
                 'message' => $winnerResult['message'],
                 'processed_count' => $winnerResult['processed_count'] ?? 0,
                 'results' => $winnerResult['details'] ?? null
-            ],
-            'slot_automation' => [
-                'status'  => 'success',
-                'message' => 'Verified/Created slots for the next 7 days',
-                'dates'   => $slotsCreated
             ]
         ];
 

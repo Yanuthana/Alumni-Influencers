@@ -18,7 +18,7 @@ function SkeletonCard({ className = '' }) {
     return <div className={`animate-pulse rounded-[24px] border border-outline-variant/30 bg-surface-container-low ${className}`} />;
 }
 
-/* ── Credential Card ───────────────────────────────────── */
+
 function CredentialCard({ icon, label, children }) {
     return (
         <div className="group rounded-[24px] border border-outline-variant/20 bg-surface-container-low/40 p-5 transition-all duration-300 hover:border-primary/25 hover:bg-surface-container-low/70 hover:shadow-lg hover:shadow-black/20">
@@ -35,7 +35,7 @@ function CredentialCard({ icon, label, children }) {
     );
 }
 
-/* ── Credential Item ───────────────────────────────────── */
+
 function CredentialItem({ title, subtitle }) {
     return (
         <div className="rounded-xl border border-outline-variant/10 bg-black/15 px-4 py-3">
@@ -45,7 +45,7 @@ function CredentialItem({ title, subtitle }) {
     );
 }
 
-/* ── Info Chip ─────────────────────────────────────────── */
+
 function InfoChip({ icon, children, href }) {
     let className = "inline-flex items-center gap-2 rounded-full border border-outline-variant/25 bg-black/20 px-4 py-2 text-sm text-secondary transition-colors hover:border-primary/40 hover:text-on-surface";
 
@@ -86,7 +86,7 @@ function FeaturedAlumniSection({ winner, loading }) {
 
     if (!winner) return null;
 
-    /* Build the credential categories */
+   
     let categories = [];
 
     if (winner.degrees && winner.degrees.length > 0) {
@@ -133,25 +133,25 @@ function FeaturedAlumniSection({ winner, loading }) {
                 description="Highlighting the professional journey and achievements of our distinguished members."
             />
 
-            {/* ── Two-column layout: Profile Card | Credentials ── */}
+            
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
 
-                {/* ── LEFT: Centered Profile Card ── */}
+                
                 <div className="relative w-full overflow-hidden rounded-[32px] border border-outline-variant/35 bg-[radial-gradient(circle_at_top_center,_rgba(255,176,201,0.18),_transparent_55%),linear-gradient(180deg,_rgba(42,42,42,0.95),_rgba(19,19,19,1))] shadow-[0_24px_60px_rgba(0,0,0,0.32)] lg:w-72 xl:w-80 shrink-0">
-                    {/* Top accent bar */}
+                    
                     <div className="h-1 w-full murrey-gradient" />
 
-                    {/* Radial glow behind avatar */}
+                    
                     <div className="pointer-events-none absolute left-1/2 top-16 h-52 w-52 -translate-x-1/2 rounded-full bg-primary/12 blur-[60px]" />
 
                     <div className="relative flex flex-col items-center px-8 pb-10 pt-10 text-center">
-                        {/* Avatar with rings */}
+                        
                         <div className="relative mb-6">
-                            {/* Outer pulse ring */}
+                            
                             <div className="absolute inset-0 rounded-full border border-primary/20 scale-[1.18]" />
                             <div className="absolute inset-0 rounded-full border border-primary/10 scale-[1.35]" />
 
-                            {/* Avatar circle */}
+                            
                             <div className="relative h-36 w-36 overflow-hidden rounded-full border-[3px] border-surface-container-high shadow-[0_0_40px_rgba(255,176,201,0.2)]">
                                 {winner.profile_image ? (
                                     <img
@@ -166,18 +166,18 @@ function FeaturedAlumniSection({ winner, loading }) {
                                 )}
                             </div>
 
-                            {/* Premium badge */}
+                            
                             <div className="absolute -bottom-1 -right-1 flex h-10 w-10 items-center justify-center rounded-full murrey-gradient text-white shadow-xl ring-[3px] ring-[#1a1a1a]">
                                 <span className="material-symbols-outlined text-lg">workspace_premium</span>
                             </div>
                         </div>
 
-                        {/* Name */}
+                        
                         <h3 className="font-headline text-2xl font-bold tracking-tight text-on-surface">
                             {winner.full_name}
                         </h3>
 
-                        {/* "Featured Alumni" role pill */}
+                        
                         <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1">
                             <span className="h-1.5 w-1.5 rounded-full murrey-gradient" />
                             <span className="text-[11px] font-label font-bold uppercase tracking-[0.2em] text-primary">
@@ -185,18 +185,18 @@ function FeaturedAlumniSection({ winner, loading }) {
                             </span>
                         </div>
 
-                        {/* Divider */}
+                        
                         <div className="my-6 h-px w-full bg-outline-variant/15" />
 
-                        {/* Quote / Headline */}
+                        
                         <p className="text-sm leading-relaxed text-secondary italic">
                             "{winner.headline || 'Dedicated to excellence and contributing to the global Westminster alumni community.'}"
                         </p>
 
-                        {/* Divider */}
+                        
                         <div className="my-6 h-px w-full bg-outline-variant/15" />
 
-                        {/* Contact info */}
+                        
                         <div className="flex w-full flex-col gap-3">
                             <div className="flex items-center gap-3 rounded-2xl border border-outline-variant/15 bg-black/20 px-4 py-3 text-left">
                                 <span className="material-symbols-outlined text-lg text-primary/70">mail</span>
@@ -218,9 +218,9 @@ function FeaturedAlumniSection({ winner, loading }) {
                     </div>
                 </div>
 
-                {/* ── RIGHT: Credentials Panel ── */}
+                
                 <div className="flex-1 rounded-[32px] border border-outline-variant/35 bg-[radial-gradient(circle_at_bottom_right,_rgba(255,176,201,0.08),_transparent_40%),linear-gradient(135deg,_rgba(42,42,42,0.95),_rgba(19,19,19,1))] shadow-[0_24px_60px_rgba(0,0,0,0.28)] overflow-hidden">
-                    {/* Header bar */}
+                    
                     <div className="border-b border-outline-variant/15 px-8 py-5">
                         <p className="text-[11px] font-label font-bold uppercase tracking-[0.28em] text-primary/60">
                             Professional Credentials
@@ -298,9 +298,9 @@ function Home(props) {
 
     return (
         <main className="min-h-screen flex flex-col bg-surface">
-            {/* ── Hero Section ── */}
+            
             <section className="relative min-h-[85vh] flex items-center px-8 md:px-24 pt-28 pb-24 overflow-hidden">
-                {/* Background Image */}
+              
                 <div className="absolute inset-0 z-0">
                     <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/80 to-transparent z-10"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent z-10"></div>

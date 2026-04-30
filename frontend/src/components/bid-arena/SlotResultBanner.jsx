@@ -17,7 +17,7 @@ function SlotResultBanner({ slot, userBid, history }) {
   if (isWon) {
     return (
       <div className="relative overflow-hidden rounded-[28px] border border-tertiary/40 bg-gradient-to-br from-tertiary/10 via-surface-container to-surface-container-high p-6 shadow-[0_0_60px_rgba(142,216,137,0.15)]">
-        {/* Confetti-style glows */}
+        
         <div className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-tertiary/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-6 -left-6 h-28 w-28 rounded-full bg-tertiary/10 blur-2xl" />
 

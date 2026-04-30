@@ -24,23 +24,23 @@ function Navbar(props) {
   for (let i = 0; i < desktopNavLinks.length; i++) {
     let item = desktopNavLinks[i];
     let shouldShow = true;
-    
+
     if (item.requiresAuth && !user) {
       shouldShow = false;
     }
-    
+
     if (item.alumniOnly) {
       if (!user || !user.role || user.role.toLowerCase() !== 'alumni') {
         shouldShow = false;
       }
     }
-    
+
     if (item.developerOnly) {
       if (!user || !user.role || user.role.toLowerCase() !== 'developer') {
         shouldShow = false;
       }
     }
-    
+
     if (shouldShow) {
       visibleLinks.push(item);
     }
@@ -54,15 +54,15 @@ function Navbar(props) {
             Westminster Regent
           </NavLink>
         </div>
-        
+
         {user ? (
           <div className="hidden md:flex items-center space-x-8">
-            {visibleLinks.map(function(item) {
+            {visibleLinks.map(function (item) {
               return (
                 <NavLink
                   key={item.label}
                   to={item.to}
-                  className={function({ isActive }) {
+                  className={function ({ isActive }) {
                     if (isActive) {
                       return baseLinkClass + " text-primary";
                     } else {

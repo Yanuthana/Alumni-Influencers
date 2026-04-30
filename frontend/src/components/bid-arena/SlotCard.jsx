@@ -1,7 +1,7 @@
 import React from 'react';
 import { getMonthlyLimitStatus } from '../../services/bid-service';
 
-/* ── Countdown hook ─────────────────────────────────────── */
+
 function useCountdown(targetDateStr) {
   const getRemaining = () => {
     if (!targetDateStr) return null;
@@ -27,7 +27,7 @@ function useCountdown(targetDateStr) {
   return remaining;
 }
 
-/* ── Status badge ──────────────────────────────────────── */
+
 function StatusBadge({ status }) {
   const map = {
     active: { label: 'Open', cls: 'bg-tertiary/20 text-tertiary border-tertiary/30' },
@@ -44,7 +44,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* ── Inline countdown display ──────────────────────────── */
 function Countdown({ targetDateStr, label }) {
   const t = useCountdown(targetDateStr);
   if (!t) return null;
@@ -64,7 +63,7 @@ function Countdown({ targetDateStr, label }) {
   );
 }
 
-/* ── Locked panel shown inside locked cards ─────────────── */
+
 function LockedPanel({ opensAt, lockReason }) {
   const t = useCountdown(opensAt);
   const pad = (n) => String(n).padStart(2, '0');
@@ -90,7 +89,7 @@ function LockedPanel({ opensAt, lockReason }) {
   );
 }
 
-/* ── SlotCard ──────────────────────────────────────────── */
+
 function SlotCard({ slot, userId, userBid, onPlaceBid, onUpdateBid, onCancelBid, onViewBidStatus }) {
   const [limitStatus, setLimitStatus] = React.useState(null);
 
@@ -110,12 +109,12 @@ function SlotCard({ slot, userId, userBid, onPlaceBid, onUpdateBid, onCancelBid,
   const canUserBidByLimit = limitStatus?.can_bid !== false;
   const biddingDisabled = !canUserBidByLimit && !hasUserBid;
 
-  // Header countdown: for locked cards count DOWN to open time; for open cards count down to close
+  
   const countdownTarget = isLocked
     ? slot?.opens_at
     : (slot?.bidding_end_time || slot?.closing_time || slot?.slot_date);
 
-  /* ── Card wrapper classes ──────────────────────────────── */
+  
   const cardCls = [
     'group relative flex flex-col rounded-[28px] border p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] transition-all duration-300 hover:-translate-y-1',
     isLocked
@@ -135,10 +134,10 @@ function SlotCard({ slot, userId, userBid, onPlaceBid, onUpdateBid, onCancelBid,
         <div className="pointer-events-none absolute inset-0 rounded-[28px] ring-1 ring-primary/40 animate-pulse" />
       )}
 
-      {/* ── Header row ─────────────────────────────────────── */}
+      
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Lock badge */}
+     
           {isLocked && (
             <span className="inline-flex items-center gap-1 rounded-full bg-outline-variant/20 border border-outline-variant/30 px-2.5 py-0.5 text-[10px] font-label uppercase tracking-widest text-secondary/70">
               <span className="material-symbols-outlined text-[12px] leading-none">lock</span>
@@ -167,7 +166,6 @@ function SlotCard({ slot, userId, userBid, onPlaceBid, onUpdateBid, onCancelBid,
           )}
         </div>
 
-        {/* Countdown chip */}
         {countdownTarget && (
           <div className="flex shrink-0 items-center gap-1.5 rounded-xl bg-black/30 border border-outline-variant/20 px-3 py-1">
             <span className="material-symbols-outlined text-sm text-secondary">

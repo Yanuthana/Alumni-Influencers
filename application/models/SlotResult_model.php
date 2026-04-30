@@ -11,7 +11,7 @@ class SlotResult_model extends CI_Model
 
 
     /**
-     * Returns the alumni_id for a given user_id, or false if not found.
+     * Gets alumni_id from user_id. Returns false if not there.
      */
     private function getAlumniId($user_id)
     {
@@ -19,24 +19,7 @@ class SlotResult_model extends CI_Model
         return $row ? $row['alumni_id'] : false;
     }
 
-    // ---------------------------------------------------------------
-    // WINNER PREDICTION
-    // Runs automatically at 6:00 PM (18:00) via cron job.
-    // Selects the highest bid from today's slot.
-    // ---------------------------------------------------------------
-
-    /**
-     * Select and persist winners for all slots on a given slot_date.
-     *
-     * Tie-breaker when multiple bids share the same max bid_amount:
-     *  - lowest bid_id wins (earliest inserted)
-     *
-     * Notes:
-     *  - "Today's bids" are implicitly the bids for slots where Slot.slot_date = $slotDate.
-     *  - Winner validity 6PM→6PM is driven by your Slot bidding window; this job runs at 18:00.
-     *
-     * @return array ['status' => bool, 'message' => string, 'data' => array|null]
-     */
+    // Picks winners for a specific date
     public function predict_winners_for_date(string $slotDate): array
     {
         // 1) Load the single slot for the requested date.
@@ -169,17 +152,12 @@ class SlotResult_model extends CI_Model
         ];
     }
 
-    /**
-     * Finds and processes all slots up to TODAY that are missing results.
-     * This ensures the system catches up if a cron job is missed (e.g. server downtime).
-     *
-     * @return array
-     */
+    // Finds and fixes missed days
     public function predict_pending_winners(): array
     {
         $today = date('Y-m-d');
 
-        // Find slots on or before today that don't have a result record yet
+        // Find slots that missed their winner pick
         $this->db->select('s.slot_date');
         $this->db->from('Slot s');
         $this->db->join('Slot_Result sr', 'sr.slot_id = s.slot_id', 'left');
@@ -192,7 +170,7 @@ class SlotResult_model extends CI_Model
         if (empty($pendingSlots)) {
             return [
                 'status' => true,
-                'message' => 'No pending slots found to process',
+                'message' => 'All good, no missed slots',
                 'processed_count' => 0,
                 'details' => []
             ];
@@ -212,15 +190,13 @@ class SlotResult_model extends CI_Model
 
         return [
             'status' => $successCount > 0,
-            'message' => "Processed {$successCount} of " . count($pendingSlots) . " pending slots",
+            'message' => "Fixed {$successCount} slots",
             'processed_count' => count($pendingSlots),
             'details' => $overallResults
         ];
     }
 
-    /**
-     * Backward-compatible wrapper: now triggers catch-up for all pending slots.
-     */
+    // Main cron function
     public function predict_winner(): array
     {
         return $this->predict_pending_winners();

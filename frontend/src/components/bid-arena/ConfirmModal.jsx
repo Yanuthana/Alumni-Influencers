@@ -8,16 +8,14 @@ function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, loading = f
       className="fixed inset-0 z-[60] flex items-center justify-center p-4"
       onClick={onCancel}
     >
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
-      {/* Modal */}
       <div
         className="relative w-full max-w-sm rounded-[28px] border border-error/30 bg-gradient-to-br from-surface-container to-surface-container-high p-6 shadow-[0_32px_80px_rgba(0,0,0,0.5)]"
         style={{ animation: 'modalIn 0.2s ease-out' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Icon */}
+
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-error/15 border border-error/25">
           <span className="material-symbols-outlined text-error text-2xl">warning</span>
         </div>

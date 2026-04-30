@@ -114,7 +114,7 @@ function ForgotPasswordForm(props) {
     let combinedOtp = newOtpArr.join('');
     setOtp(combinedOtp);
 
-    // Auto focus next
+    
     if (char && index < 5) {
       otpRefs[index + 1].current.focus();
     }

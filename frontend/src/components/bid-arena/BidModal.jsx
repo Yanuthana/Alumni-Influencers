@@ -41,16 +41,16 @@ function BidModal({ isOpen, mode = 'place', slot, currentBid, onSubmit, onClose,
       className="fixed inset-0 z-[60] flex items-center justify-center p-4"
       onClick={onClose}
     >
-      {/* Backdrop */}
+      
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
-      {/* Modal */}
+    
       <div
         className="relative w-full max-w-md rounded-[28px] border border-outline-variant/40 bg-gradient-to-br from-surface-container to-surface-container-high p-7 shadow-[0_32px_80px_rgba(0,0,0,0.5)]"
         style={{ animation: 'modalIn 0.2s ease-out' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
+      
         <button
           id="bid-modal-close"
           onClick={onClose}
@@ -59,7 +59,7 @@ function BidModal({ isOpen, mode = 'place', slot, currentBid, onSubmit, onClose,
           <span className="material-symbols-outlined text-lg">close</span>
         </button>
 
-        {/* Header */}
+ 
         <div className="mb-6">
           <p className="mb-2 text-[11px] font-label uppercase tracking-[0.28em] text-primary/75">
             {isUpdate ? 'Update Bid' : 'Place Bid'}
@@ -102,7 +102,7 @@ function BidModal({ isOpen, mode = 'place', slot, currentBid, onSubmit, onClose,
           </div>
           {error && <p className="mb-3 text-xs text-error">{error}</p>}
 
-          {/* Terms notice */}
+        
           <p className="mb-5 mt-3 text-xs leading-5 text-secondary/70 rounded-xl border border-outline-variant/20 bg-black/20 px-4 py-3">
             By placing a bid, you agree to the Alumni Bidding Protocol and acknowledge that bids are binding pending slot assignment.
           </p>

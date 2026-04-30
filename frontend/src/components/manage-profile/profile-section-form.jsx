@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 export const ProfileSectionForm = ({ 
     isOpen, 
     onClose, 
-    onConfirm, // Legacy support if needed
+    onConfirm, 
     addService,
     updateService,
     userId,
@@ -73,9 +73,6 @@ export const ProfileSectionForm = ({
         const newErrors = {};
         let isValid = true;
 
-        const yearRegex = /^\d{4}$/;
-        const employmentYearsRegex = /^\d{4}-(\d{4}|Present)$/;
-
         data.forEach((item, index) => {
             fields.forEach(field => {
                 const value = item[field.key]?.toString().trim();
@@ -83,13 +80,9 @@ export const ProfileSectionForm = ({
                 if (!value) {
                     newErrors[`${index}-${field.key}`] = `${field.label} is required`;
                     isValid = false;
-                } else if (field.type === 'year' && !yearRegex.test(value)) {
-                    newErrors[`${index}-${field.key}`] = 'Must be a 4-digit year';
-                    isValid = false;
-                } else if (field.type === 'employmentYears' && !employmentYearsRegex.test(value)) {
-                    newErrors[`${index}-${field.key}`] = 'Format: YYYY-YYYY or YYYY-Present';
-                    isValid = false;
                 }
+                // Note: Strict regex validation for 'year' and 'employmentYears' has been removed 
+                // to provide more flexibility as requested.
             });
         });
 

@@ -32,13 +32,13 @@ function BidStatusModal({ isOpen, onClose, slot, userBid, userId }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
+  
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={onClose}
       />
 
-      {/* Modal Content */}
+      
       <div className="relative w-full max-w-md overflow-hidden rounded-[32px] border border-outline-variant/30 bg-surface-container-high p-1 shadow-[0_32px_80px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-200">
         <div className="rounded-[28px] bg-gradient-to-br from-surface to-surface-container-low p-8">
 
@@ -70,7 +70,7 @@ function BidStatusModal({ isOpen, onClose, slot, userBid, userId }) {
             </div>
           ) : (
             <div className="space-y-8">
-              {/* Status Indicator */}
+             
               <div className="flex flex-col items-center text-center">
                 <div className={[
                   "mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 shadow-lg animate-in zoom-in-50 duration-500",
@@ -96,7 +96,6 @@ function BidStatusModal({ isOpen, onClose, slot, userBid, userId }) {
                 </p>
               </div>
 
-              {/* Bid Details Card */}
               <div className="rounded-2xl border border-outline-variant/30 bg-surface-variant/20 p-5">
                 <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4 mb-4">
                   <span className="text-[11px] font-label uppercase tracking-widest text-secondary/70">Your Bid</span>

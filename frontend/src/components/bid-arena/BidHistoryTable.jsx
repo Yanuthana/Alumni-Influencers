@@ -58,14 +58,14 @@ function BidHistoryTable({ history, loading }) {
             key={record.bid_id || idx}
             className="group flex items-center gap-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low px-5 py-4 transition-all hover:border-outline-variant/40 hover:bg-surface-container"
           >
-            {/* Timeline dot */}
+            
             <div className="flex shrink-0 flex-col items-center">
               <div className={`h-10 w-10 rounded-full flex items-center justify-center border ${cfg.cls}`}>
                 <span className="material-symbols-outlined text-base leading-none">{cfg.icon}</span>
               </div>
             </div>
 
-            {/* Info */}
+          
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <p className="truncate font-headline text-base text-on-surface">
@@ -80,13 +80,12 @@ function BidHistoryTable({ history, loading }) {
               <p className="text-xs text-secondary">Slot Date: {formatDate(record.slot_date)}</p>
             </div>
 
-            {/* Bid amount */}
             <div className="text-right">
               <p className="font-headline text-lg text-on-surface">${Number(record.bid_amount).toLocaleString()}</p>
               <p className="text-xs text-secondary">Your Bid</p>
             </div>
 
-            {/* Status badge */}
+            
             <span className={`hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-0.5 text-[10px] font-label uppercase tracking-[0.18em] ${cfg.cls}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
               {cfg.label}

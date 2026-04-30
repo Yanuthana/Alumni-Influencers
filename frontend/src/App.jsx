@@ -19,13 +19,13 @@ import { verifyEmail, logout } from './services/auth-service';
 function App() {
   let location = useLocation();
   let navigate = useNavigate();
-  
+
   let [showSignup, setShowSignup] = React.useState(false);
   let [showSignin, setShowSignin] = React.useState(false);
   let [showForgotPassword, setShowForgotPassword] = React.useState(false);
   let [prefilledEmail, setPrefilledEmail] = React.useState('');
   let [showDropDown, setShowDropDown] = React.useState(false);
-  
+
   function getInitialUser() {
     let savedUser = localStorage.getItem('user');
     if (savedUser) {
@@ -39,11 +39,11 @@ function App() {
     }
     return null;
   }
-  
+
   let [user, setUser] = React.useState(getInitialUser());
   let verificationStarted = React.useRef(false);
 
-  React.useEffect(function() {
+  React.useEffect(function () {
     let urlParams = new URLSearchParams(location.search);
     let token = urlParams.get('verify_token');
     let email = urlParams.get('email');
@@ -51,7 +51,7 @@ function App() {
     if (token) {
       if (verificationStarted.current === false) {
         verificationStarted.current = true;
-        
+
         async function performVerification() {
           try {
             let response = await verifyEmail(token);
@@ -88,8 +88,8 @@ function App() {
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
-    
-    return function() {
+
+    return function () {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [location.pathname, location.search, showDropDown, navigate]);
@@ -213,10 +213,10 @@ function App() {
         <Route
           path="/"
           element={
-            <Home 
-              user={user} 
-              onPrimaryCta={handlePrimaryCta} 
-              onSecondaryCta={handleSecondaryCta} 
+            <Home
+              user={user}
+              onPrimaryCta={handlePrimaryCta}
+              onSecondaryCta={handleSecondaryCta}
             />
           }
         />

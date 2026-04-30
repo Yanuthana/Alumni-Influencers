@@ -1,5 +1,4 @@
-
-export const addDegree = async (userId: string | number, degree: any) => {
+export const addDegree = async (userId, degree) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/degrees?user_id=${userId}`, {
         method: 'POST',
@@ -17,7 +16,7 @@ export const addDegree = async (userId: string | number, degree: any) => {
     return payload;
 }
 
-export const addCertification = async (userId: string | number, certification: any) => {
+export const addCertification = async (userId, certification) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/certifications?user_id=${userId}`, {
         method: 'POST',
@@ -35,7 +34,7 @@ export const addCertification = async (userId: string | number, certification: a
     return payload;
 }
 
-export const addLicense = async (userId: string | number, licenses: any) => {
+export const addLicense = async (userId, licenses) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/licenses?user_id=${userId}`, {
         method: 'POST',
@@ -53,7 +52,7 @@ export const addLicense = async (userId: string | number, licenses: any) => {
     return payload;
 }
 
-export const addCourse = async (userId: string | number, course: any) => {
+export const addCourse = async (userId, course) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/professional_courses?user_id=${userId}`, {
         method: 'POST',
@@ -71,7 +70,7 @@ export const addCourse = async (userId: string | number, course: any) => {
     return payload;
 }
 
-export const addEmployment = async (userId: string | number, employmentData: any) => {
+export const addEmployment = async (userId, employmentData) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/employment_history?user_id=${userId}`, {
         method: 'POST',
@@ -89,7 +88,7 @@ export const addEmployment = async (userId: string | number, employmentData: any
     return payload;
 }
 
-export const updateProfileImage = async (userId: string | number, image: string) => {
+export const updateProfileImage = async (userId, image) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/profile/image?user_id=${userId}`, {
         method: 'PUT',
@@ -107,7 +106,7 @@ export const updateProfileImage = async (userId: string | number, image: string)
     return payload;
 }
 
-export const updateDegrees = async (userId: string | number, degrees: any[]) => {
+export const updateDegrees = async (userId, degrees) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/degrees?user_id=${userId}`, {
         method: 'PUT',
@@ -125,7 +124,7 @@ export const updateDegrees = async (userId: string | number, degrees: any[]) => 
     return payload;
 }
 
-export const updateCertifications = async (userId: string | number, certifications: any[]) => {
+export const updateCertifications = async (userId, certifications) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/certifications?user_id=${userId}`, {
         method: 'PUT',
@@ -143,7 +142,7 @@ export const updateCertifications = async (userId: string | number, certificatio
     return payload;
 }
 
-export const updateLicenses = async (userId: string | number, licenses: any[]) => {
+export const updateLicenses = async (userId, licenses) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/licenses?user_id=${userId}`, {
         method: 'PUT',
@@ -161,7 +160,7 @@ export const updateLicenses = async (userId: string | number, licenses: any[]) =
     return payload;
 }
 
-export const updateCourses = async (userId: string | number, courses: any[]) => {
+export const updateCourses = async (userId, courses) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/professional_courses?user_id=${userId}`, {
         method: 'PUT',
@@ -179,7 +178,7 @@ export const updateCourses = async (userId: string | number, courses: any[]) => 
     return payload;
 }
 
-export const updateEmployment = async (userId: string | number, employmentHistory: any[]) => {
+export const updateEmployment = async (userId, employmentHistory) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/employment_history?user_id=${userId}`, {
         method: 'PUT',
@@ -197,7 +196,7 @@ export const updateEmployment = async (userId: string | number, employmentHistor
     return payload;
 }
 
-export const updateLinkedin = async (userId: string | number, linkedin: string) => {
+export const updateLinkedin = async (userId, linkedin) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`/api/alumni/profile/linkedin?user_id=${userId}`, {
         method: 'PUT',
@@ -215,7 +214,7 @@ export const updateLinkedin = async (userId: string | number, linkedin: string) 
     return payload;
 }
 
-const deleteRecord = async (endpoint: string, userId: string | number, index: number) => {
+const deleteRecord = async (endpoint, userId, index) => {
     const token = localStorage.getItem('api_token');
     const response = await fetch(`${endpoint}?user_id=${userId}`, {
         method: 'DELETE',
@@ -233,17 +232,17 @@ const deleteRecord = async (endpoint: string, userId: string | number, index: nu
     return payload;
 };
 
-export const deleteEducation = (userId: string | number, index: number) => 
+export const deleteEducation = (userId, index) => 
     deleteRecord('/api/alumni/degrees', userId, index);
 
-export const deleteCertification = (userId: string | number, index: number) => 
+export const deleteCertification = (userId, index) => 
     deleteRecord('/api/alumni/certifications', userId, index);
 
-export const deleteLicense = (userId: string | number, index: number) => 
+export const deleteLicense = (userId, index) => 
     deleteRecord('/api/alumni/licenses', userId, index);
 
-export const deleteCourse = (userId: string | number, index: number) => 
+export const deleteCourse = (userId, index) => 
     deleteRecord('/api/alumni/professional_courses', userId, index);
 
-export const deleteEmployment = (userId: string | number, index: number) => 
+export const deleteEmployment = (userId, index) => 
     deleteRecord('/api/alumni/employment_history', userId, index);

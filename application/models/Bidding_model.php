@@ -16,13 +16,7 @@ class Bidding_model extends CI_Model
         return $row ? $row['alumni_id'] : false;
     }
 
-    /**
-     * Returns currently biddable slots:
-     *   1. Today's slot  — shown only if current time < 6 PM (bidding window still open).
-     *   2. Tomorrow's slot — always shown; flagged is_locked=true until 6 PM today opens bidding.
-     *
-     * Also auto-creates any missing slots and, past 6 PM, creates the day-after-tomorrow slot.
-     */
+    // Shows slots that people can bid on
     public function getAvailableSlots()
     {
         $currentTime  = time();
@@ -104,43 +98,42 @@ class Bidding_model extends CI_Model
     }
 
 
+    // Places a new bid
     public function place_bid($bidpayload)
     {
-        // Find alumni_id using user_id
+        // Get alumni id
         $alumniId = $this->getAlumniId($bidpayload['user_id']);
         if (!$alumniId) {
             return ['status' => false, 'message' => 'Alumni account not found'];
         }
 
-        // Check monthly win limit — alumni who have won 3 times this month cannot bid
+        // Did they win 3 times already?
         if ($this->slotresult_model->hasReachedMonthlyLimit($alumniId)) {
             return ['status' => false, 'message' => 'You have reached your monthly win limit (3 wins). You cannot bid until next month.'];
         }
 
-        // Check if the slot exists
+        // Check if slot exists
         $slot = $this->db->get_where('Slot', ['slot_id' => $bidpayload['slot_id']])->row_array();
         if (!$slot) {
             return ['status' => false, 'message' => 'Slot not found'];
         }
 
-        // Check if the bidding window is currently open
+        // Is it the right time to bid?
         $currentTime = date('Y-m-d H:i:s');
         if ($currentTime < $slot['bidding_start_time'] || $currentTime > $slot['bidding_end_time']) {
             return ['status' => false, 'message' => 'Bidding is currently closed for this slot'];
         }
 
-        // Check if a bid already exists for this alumni and slot (to avoid duplicate entry error)
+        // Check if bid already there
         $existingBid = $this->db->get_where('Bid', [
             'alumni_id' => $alumniId,
             'slot_id'   => $bidpayload['slot_id']
         ])->row_array();
 
         if ($existingBid) {
-            // If bid exists, update it instead of inserting a new one
-            // This allows re-bidding if the previous bid was cancelled
             return ['status' => false, 'message' => 'You have already placed a bid for this slot.Update the slot'];
         } else {
-            // Prepare bid data according to the Bids table schema
+            // Save bid
             $data = [
                 'alumni_id'  => $alumniId,
                 'slot_id'    => $bidpayload['slot_id'],
@@ -225,9 +218,7 @@ class Bidding_model extends CI_Model
         $this->db->order_by('bid_amount', 'DESC');
         $allBids = $this->db->get('Bid')->result_array();
 
-        $highestBid = !empty($allBids) ? $allBids[0]['bid_amount'] : 0;
-
-        // Current bid is winning if it's ACTIVE and its amount is STRICTLY higher than any other active bid
+        // Check if I am winning
         $isWinning = false;
         if ($bid['status'] == 'ACTIVE') {
             $isWinning = true;

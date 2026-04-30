@@ -83,6 +83,9 @@ $route['api/alumni/profile/image']['put']          = 'AlumniProfile/update_profi
 $route['api/alumni/profile/linkedin']['put']       = 'AlumniProfile/update_linkedin_url';
 $route['api/alumni/profile/completion-status']['get'] = 'AlumniProfile/update_completion_status';
 
+// Directory
+$route['api/alumni/directory']['get']              = 'AlumniDirectory/index';
+
 // Degrees 
 $route['api/alumni/degrees']['post']               = 'AlumniProfile/add_degrees';
 $route['api/alumni/degrees']['put']                = 'AlumniProfile/update_degrees';
@@ -115,6 +118,7 @@ $route['api/alumni/monthly-limit-status']['get']   = 'SlotResult/monthly_limit_s
 // /api/slots
 // -------------------------
 $route['api/slots']['get']                         = 'BiddingSystem/view_slots';
+$route['api/slots/by-date']['post']                = 'BiddingSystem/get_slot_by_date';
 
 $route['api/slots/result']['get']                  = 'SlotResult/slot_result';
 
@@ -128,7 +132,13 @@ $route['api/bids/history']['get']                  = 'BiddingSystem/view_bidding
 
 $route['api/bids']['put']                          = 'BiddingSystem/update_bid';
 $route['api/bids']['delete']                       = 'BiddingSystem/cancel_bid';
-$route['api/bidsstatus']['get']                    = 'BiddingSystem/view_bid_status';
+$route['api/bidsstatus']['post']                    = 'BiddingSystem/view_bid_status';
+
+// -------------------------
+// /api/dashboard/*
+// -------------------------
+$route['api/dashboard/personal']['get']            = 'DashboardAnalytics/personal';
+$route['api/dashboard/global']['get']              = 'DashboardAnalytics/global';
 
 // -------------------------
 // /api/featured-alumni

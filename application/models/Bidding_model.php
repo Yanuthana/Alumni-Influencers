@@ -16,29 +16,48 @@ class Bidding_model extends CI_Model
         return $row ? $row['alumni_id'] : false;
     }
 
-    /**
-     * Get's tomorrow's bidding slot.
-     * Automatically ensures slots for tomorrow and the day after are created if it's past 6 PM.
-     */
-    public function getTomorrowSlot()
+    // Shows slots that people can bid on
+    public function getAvailableSlots()
     {
-        $currentTime = time();
-        $todayStr = date('Y-m-d', $currentTime);
-        $tomorrowStr = date('Y-m-d', strtotime('+1 day', $currentTime));
-        $dayAfterTomorrowStr = date('Y-m-d', strtotime('+2 days', $currentTime));
+        $currentTime  = time();
+        $todayStr     = date('Y-m-d', $currentTime);
+        $tomorrowStr  = date('Y-m-d', strtotime('+1 day',  $currentTime));
+        $dayAfterStr  = date('Y-m-d', strtotime('+2 days', $currentTime));
 
-        $sixPMToday = strtotime($todayStr . ' 18:00:00');
+        $sixPMToday   = strtotime($todayStr . ' 18:00:00');
+        $isPast6PM    = $currentTime >= $sixPMToday;
 
-        // Always ensure tomorrow's slot exists
+        // Ensure tomorrow's slot exists always
         $this->ensureSlotExists($tomorrowStr);
 
-        // Every 6 PM, create next two slots automatically
-        if ($currentTime >= $sixPMToday) {
-            $this->ensureSlotExists($dayAfterTomorrowStr);
+        // After 6 PM, also ensure the day-after-tomorrow slot
+        if ($isPast6PM) {
+            $this->ensureSlotExists($dayAfterStr);
         }
 
-        // Return tomorrow's slot details
-        return $this->db->get_where('Slot', ['slot_date' => $tomorrowStr])->row_array();
+        $slots = [];
+
+        // ── Today's slot (biddable until 6 PM) ──────────────
+        if (!$isPast6PM) {
+            $todaySlot = $this->db->get_where('Slot', ['slot_date' => $todayStr])->row_array();
+            if ($todaySlot) {
+                $todaySlot['is_locked']   = false;
+                $todaySlot['lock_reason'] = null;
+                $todaySlot['opens_at']    = null;
+                $slots[] = $todaySlot;
+            }
+        }
+
+        // ── Tomorrow's slot (locked until 6 PM today) ───────
+        $tomorrowSlot = $this->db->get_where('Slot', ['slot_date' => $tomorrowStr])->row_array();
+        if ($tomorrowSlot) {
+            $tomorrowSlot['is_locked']   = !$isPast6PM;           // locked before 6 PM
+            $tomorrowSlot['lock_reason'] = !$isPast6PM ? 'Opens at 6 PM today' : null;
+            $tomorrowSlot['opens_at']    = !$isPast6PM ? ($todayStr . ' 18:00:00') : null;
+            $slots[] = $tomorrowSlot;
+        }
+
+        return $slots;
     }
 
     /**
@@ -79,43 +98,42 @@ class Bidding_model extends CI_Model
     }
 
 
+    // Places a new bid
     public function place_bid($bidpayload)
     {
-        // Find alumni_id using user_id
+        // Get alumni id
         $alumniId = $this->getAlumniId($bidpayload['user_id']);
         if (!$alumniId) {
             return ['status' => false, 'message' => 'Alumni account not found'];
         }
 
-        // Check monthly win limit — alumni who have won 3 times this month cannot bid
+        // Did they win 3 times already?
         if ($this->slotresult_model->hasReachedMonthlyLimit($alumniId)) {
             return ['status' => false, 'message' => 'You have reached your monthly win limit (3 wins). You cannot bid until next month.'];
         }
 
-        // Check if the slot exists
+        // Check if slot exists
         $slot = $this->db->get_where('Slot', ['slot_id' => $bidpayload['slot_id']])->row_array();
         if (!$slot) {
             return ['status' => false, 'message' => 'Slot not found'];
         }
 
-        // Check if the bidding window is currently open
+        // Is it the right time to bid?
         $currentTime = date('Y-m-d H:i:s');
         if ($currentTime < $slot['bidding_start_time'] || $currentTime > $slot['bidding_end_time']) {
             return ['status' => false, 'message' => 'Bidding is currently closed for this slot'];
         }
 
-        // Check if a bid already exists for this alumni and slot (to avoid duplicate entry error)
+        // Check if bid already there
         $existingBid = $this->db->get_where('Bid', [
             'alumni_id' => $alumniId,
             'slot_id'   => $bidpayload['slot_id']
         ])->row_array();
 
         if ($existingBid) {
-            // If bid exists, update it instead of inserting a new one
-            // This allows re-bidding if the previous bid was cancelled
             return ['status' => false, 'message' => 'You have already placed a bid for this slot.Update the slot'];
         } else {
-            // Prepare bid data according to the Bids table schema
+            // Save bid
             $data = [
                 'alumni_id'  => $alumniId,
                 'slot_id'    => $bidpayload['slot_id'],
@@ -125,7 +143,7 @@ class Bidding_model extends CI_Model
 
             // Insert into the Bids table
             if ($this->db->insert('Bid', $data)) {
-                return ['status' => true, 'message' => 'Bid placed successfully','bid_id'=>$this->db->insert_id()];
+                return ['status' => true, 'message' => 'Bid placed successfully', 'bid_id' => $this->db->insert_id()];
             }
         }
 
@@ -173,7 +191,7 @@ class Bidding_model extends CI_Model
 
 
         $this->db->where('bid_id', $bidId);
-        $this->db->update('Bid', ['bid_amount' => $bidAmount,'status'=>'ACTIVE','updated_at'=>date('Y-m-d H:i:s')]);
+        $this->db->update('Bid', ['bid_amount' => $bidAmount, 'status' => 'ACTIVE', 'updated_at' => date('Y-m-d H:i:s')]);
 
         return ['status' => true, 'message' => 'Bid updated successfully'];
     }
@@ -200,9 +218,7 @@ class Bidding_model extends CI_Model
         $this->db->order_by('bid_amount', 'DESC');
         $allBids = $this->db->get('Bid')->result_array();
 
-        $highestBid = !empty($allBids) ? $allBids[0]['bid_amount'] : 0;
-
-        // Current bid is winning if it's ACTIVE and its amount is STRICTLY higher than any other active bid
+        // Check if I am winning
         $isWinning = false;
         if ($bid['status'] == 'ACTIVE') {
             $isWinning = true;
@@ -232,7 +248,7 @@ class Bidding_model extends CI_Model
             return ['status' => false, 'message' => 'Alumni account not found'];
         }
 
-        $this->db->select('s.slot_date, b.bid_amount, b.status as result_status');
+        $this->db->select('b.bid_id, b.slot_id, s.slot_date, b.bid_amount, b.status as result_status');
         $this->db->from('Bid b');
         $this->db->join('Slot s', 'b.slot_id = s.slot_id');
         $this->db->where('b.alumni_id', $alumniId);
@@ -245,6 +261,12 @@ class Bidding_model extends CI_Model
             'message' => 'Bidding history fetched successfully',
             'data' => $query->result_array()
         ];
+    }
+
+    public function get_slot_by_date($date)
+    {
+        $query = $this->db->get_where('Slot', ['slot_date' => $date]);
+        return $query->row_array();
     }
 }
 

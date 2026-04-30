@@ -5,12 +5,7 @@ use Firebase\JWT\Key;
 use OpenApi\Annotations as OA;
 
 /**
- * @property CI_Input  $input
- * @property CI_Output $output
- * @property CI_Loader $load
- * @property CI_Config $config
- * @property CI_DB_query_builder $db
- * @property Api_log_model $api_logs
+ * Base API Controller - common stuff for all APIs
  */
 class BaseApiController extends CI_Controller
 {
@@ -36,9 +31,7 @@ class BaseApiController extends CI_Controller
         exit;
     }
 
-    /**
-     * Log the current request.
-     */
+    // Saves the request to the database
     private function _log_request(int $status): void
     {
         $consumer = $this->input->get_request_header('X-Consumer-Username', TRUE) 
@@ -53,9 +46,7 @@ class BaseApiController extends CI_Controller
         ]);
     }
 
-    /**
-     * Decode JSON request body. Responds 400 if body is not valid JSON.
-     */
+    // Gets the JSON body from the request
     protected function _json_body(): array
     {
         $raw  = file_get_contents('php://input');
@@ -69,10 +60,7 @@ class BaseApiController extends CI_Controller
         return $data;
     }
 
-    /**
-     * Extract Bearer token from Authorization header.
-     * Returns null if not present.
-     */
+    // Gets the bearer token from headers
     protected function _bearer_token(): ?string
     {
         $header = $this->input->get_request_header('Authorization', TRUE);
@@ -92,10 +80,7 @@ class BaseApiController extends CI_Controller
         $this->load->library('email', $config);
     }
 
-    /**
-     * Require a valid Kong API key (checks injected headers)
-     * Returns the consumer username (e.g. email) if valid.
-     */
+    // Checks if the API key is valid
     protected function _require_api_key(): string
     {
         // 1. Check for identifier injected by Kong
@@ -142,6 +127,21 @@ class BaseApiController extends CI_Controller
         }
 
         return $user; // Return user so the controller can use the data
+    }
+
+    protected function _require_authenticated_user()
+    {
+        $token = $this->_bearer_token();
+        if (!$token) {
+            $this->_respond(401, ['status' => 'error', 'message' => 'Bearer token is required']);
+            return;
+        }
+
+        try {
+            return (array) JWT::decode($token, new Key($this->JWT_KEY, 'HS256'));
+        } catch (Exception $e) {
+            $this->_respond(401, ['status' => 'error', 'message' => 'Invalid or expired token: ' . $e->getMessage()]);
+        }
     }
 
 }

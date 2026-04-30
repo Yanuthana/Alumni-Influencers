@@ -1,43 +1,25 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class SlotResult_model extends CI_Model {
+class SlotResult_model extends CI_Model
+{
 
     public function __construct()
     {
         parent::__construct();
     }
 
-    // ---------------------------------------------------------------
-    // HELPER
-    // ---------------------------------------------------------------
 
     /**
-     * Returns the alumni_id for a given user_id, or false if not found.
+     * Gets alumni_id from user_id. Returns false if not there.
      */
-    private function getAlumniId($user_id) {
+    private function getAlumniId($user_id)
+    {
         $row = $this->db->get_where('alumni', ['user_id' => $user_id])->row_array();
         return $row ? $row['alumni_id'] : false;
     }
 
-    // ---------------------------------------------------------------
-    // WINNER PREDICTION
-    // Runs automatically at 6:00 PM (18:00) via cron job.
-    // Selects the highest bid from today's slot.
-    // ---------------------------------------------------------------
-
-    /**
-     * Select and persist winners for all slots on a given slot_date.
-     *
-     * Tie-breaker when multiple bids share the same max bid_amount:
-     *  - lowest bid_id wins (earliest inserted)
-     *
-     * Notes:
-     *  - "Today's bids" are implicitly the bids for slots where Slot.slot_date = $slotDate.
-     *  - Winner validity 6PM→6PM is driven by your Slot bidding window; this job runs at 18:00.
-     *
-     * @return array ['status' => bool, 'message' => string, 'data' => array|null]
-     */
+    // Picks winners for a specific date
     public function predict_winners_for_date(string $slotDate): array
     {
         // 1) Load the single slot for the requested date.
@@ -170,20 +152,63 @@ class SlotResult_model extends CI_Model {
         ];
     }
 
-    /**
-     * Backward-compatible wrapper: selects winners for today's slot_date.
-     */
-    public function predict_winner(): array
+    // Finds and fixes missed days
+    public function predict_pending_winners(): array
     {
-        return $this->predict_winners_for_date(date('Y-m-d'));
+        $today = date('Y-m-d');
+
+        // Find slots that missed their winner pick
+        $this->db->select('s.slot_date');
+        $this->db->from('Slot s');
+        $this->db->join('Slot_Result sr', 'sr.slot_id = s.slot_id', 'left');
+        $this->db->where('s.slot_date <=', $today);
+        $this->db->where('sr.result_id IS NULL', null, false);
+        $this->db->order_by('s.slot_date', 'ASC');
+        
+        $pendingSlots = $this->db->get()->result_array();
+
+        if (empty($pendingSlots)) {
+            return [
+                'status' => true,
+                'message' => 'All good, no missed slots',
+                'processed_count' => 0,
+                'details' => []
+            ];
+        }
+
+        $overallResults = [];
+        $successCount = 0;
+
+        foreach ($pendingSlots as $row) {
+            $date = $row['slot_date'];
+            $result = $this->predict_winners_for_date($date);
+            $overallResults[$date] = $result;
+            if ($result['status']) {
+                $successCount++;
+            }
+        }
+
+        return [
+            'status' => $successCount > 0,
+            'message' => "Fixed {$successCount} slots",
+            'processed_count' => count($pendingSlots),
+            'details' => $overallResults
+        ];
     }
 
- 
+    // Main cron function
+    public function predict_winner(): array
+    {
+        return $this->predict_pending_winners();
+    }
+
+
     /**
      * Increment the win count for an alumni in the current month/year.
      * Inserts a new record if one doesn't exist yet.
      */
-    private function _incrementMonthlyWinCount($alumniId) {
+    private function _incrementMonthlyWinCount($alumniId)
+    {
         $month = (int) date('m');
         $year  = (int) date('Y');
 
@@ -219,7 +244,8 @@ class SlotResult_model extends CI_Model {
      * @param int $alumniId
      * @return bool  true = limit reached (cannot bid), false = can still bid
      */
-    public function hasReachedMonthlyLimit($alumniId) {
+    public function hasReachedMonthlyLimit($alumniId)
+    {
         $month = (int) date('m');
         $year  = (int) date('Y');
 
@@ -239,7 +265,8 @@ class SlotResult_model extends CI_Model {
     /**
      * Get the result (winner details) for a specific slot.
      */
-    public function get_slot_result($slotId) {
+    public function get_slot_result($slotId)
+    {
         $this->db->select('Slot_Result.result_id, Slot_Result.slot_id, Slot_Result.winning_bid_id, Slot_Result.selected_at,
                            Bid.bid_amount, Bid.alumni_id,
                            alumni.alumni_id, 
@@ -288,7 +315,8 @@ class SlotResult_model extends CI_Model {
     /**
      * Return monthly win limit status for the authenticated alumni.
      */
-    public function get_monthly_limit_status($userId) {
+    public function get_monthly_limit_status($userId)
+    {
         $alumniId = $this->getAlumniId($userId);
         if (!$alumniId) {
             return ['status' => false, 'message' => 'Alumni account not found'];

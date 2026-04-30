@@ -1,0 +1,137 @@
+{
+    "status": "success",
+    "message": "Global dashboard insights fetched successfully",
+    "data": {
+        "totalAlumni": 15,
+        "topSkills": [
+            {
+                "label": "IT",
+                "count": 27,
+                "trend": "up"
+            },
+            {
+                "label": "Finance",
+                "count": 25,
+                "trend": "steady"
+            },
+            {
+                "label": "AWS",
+                "count": 20,
+                "trend": "steady"
+            },
+            {
+                "label": "BSc",
+                "count": 10,
+                "trend": "steady"
+            },
+            {
+                "label": "Data Analytics Udemy 2024",
+                "count": 8,
+                "trend": "steady"
+            },
+            {
+                "label": "Analyst",
+                "count": 8,
+                "trend": "steady"
+            }
+        ],
+        "topOccupations": [
+            {
+                "label": "IT Executive",
+                "count": 9,
+                "trend": "up"
+            },
+            {
+                "label": "Business Analyst",
+                "count": 8,
+                "trend": "steady"
+            },
+            {
+                "label": "Software Engineer",
+                "count": 1,
+                "trend": "new"
+            },
+            {
+                "label": "plp",
+                "count": 1,
+                "trend": "new"
+            },
+            {
+                "label": "kk",
+                "count": 1,
+                "trend": "new"
+            }
+        ],
+        "topCertifications": [
+            {
+                "label": "AWS Certified Developer",
+                "count": 20,
+                "trend": "up"
+            },
+            {
+                "label": "CFA Level 1",
+                "count": 8,
+                "trend": "steady"
+            },
+            {
+                "label": "yanu",
+                "count": 1,
+                "trend": "new"
+            },
+            {
+                "label": "jjj",
+                "count": 1,
+                "trend": "new"
+            }
+        ],
+        "topCourses": [
+            {
+                "label": "Business Finance",
+                "count": 17,
+                "trend": "up",
+                "provider": "Independent"
+            },
+            {
+                "label": "Data Analytics",
+                "count": 8,
+                "trend": "steady",
+                "provider": "Independent"
+            },
+            {
+                "label": "Front end Development",
+                "count": 1,
+                "trend": "new",
+                "provider": "Independent"
+            },
+            {
+                "label": "ய்ffgggg",
+                "count": 1,
+                "trend": "new",
+                "provider": "Independent"
+            },
+            {
+                "label": "nj",
+                "count": 1,
+                "trend": "new",
+                "provider": "Independent"
+            }
+        ],
+        "topDegrees": [
+            {
+                "label": "BSc IT",
+                "count": 9,
+                "trend": "up"
+            },
+            {
+                "label": "BSc Computer Science",
+                "count": 1,
+                "trend": "new"
+            },
+            {
+                "label": "yy",
+                "count": 1,
+                "trend": "new"
+            }
+        ]
+    }
+}

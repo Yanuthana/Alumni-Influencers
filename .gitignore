@@ -1,0 +1,9 @@
+.env
+.DS_Store
+/vendor/
+/application/logs/*
+/application/cache/*
+!/application/logs/index.html
+!/application/cache/index.html
+frontend/node_modules
+/frontend/dist

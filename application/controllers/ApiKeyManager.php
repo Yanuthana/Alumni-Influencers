@@ -102,21 +102,17 @@ class ApiKeyManager extends BaseApiController
     }
 
     /**
-     * Revoke API Key
-     * DELETE /api/api-key-management/revoke?username=developer1&key_id=<key-id>
+     * @OA\Delete(
+     *     path="/api/api-key-management/revoke",
+     *     summary="Revoke API key",
+     *     tags={"API Key Management"},
+     *     security={{"bearerAuth": {}, "apiKeyAuth": {}}},
+     *     @OA\Parameter(name="username", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="key_id", in="query", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Key revoked"),
+     *     @OA\Response(response=400, description="Failed to revoke")
+     * )
      */
-    /**
- * @OA\Delete(
- *     path="/api/api-key-management/revoke",
- *     summary="Revoke API key",
- *     tags={"API Key Management"},
- *     security={{"bearerAuth": {}, "apiKeyAuth": {}}},
- *     @OA\Parameter(name="username", in="query", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="key_id", in="query", required=true, @OA\Schema(type="string")),
- *     @OA\Response(response=200, description="Key revoked"),
- *     @OA\Response(response=400, description="Failed to revoke")
- * )
- */
     public function revoke_key()
     {
         $this->_require_api_key();
@@ -153,10 +149,6 @@ class ApiKeyManager extends BaseApiController
     }
 
     /**
-     * View Key Statistics
-     * GET /api/api-key-management/stats
-     */
-    /**
  * @OA\Get(
  *     path="/api/api-key-management/stats",
  *     summary="View key statistics",
@@ -177,10 +169,6 @@ class ApiKeyManager extends BaseApiController
         ]);
     }
 
-    /**
-     * View Full API Logs
-     * GET /api/api-key-management/logs
-     */
     /**
  * @OA\Get(
  *     path="/api/api-key-management/logs",

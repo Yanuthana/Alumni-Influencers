@@ -49,6 +49,19 @@ class  ViewWinner extends BaseApiController
     }
 
 
+    /**
+     * @OA\Get(
+     *     path="/api/featured-alumni",
+     *     summary="View winner details for a specific slot (Public/Gateway access)",
+     *     tags={"Featured Alumni"},
+     *     security={{"apiKeyAuth": {}}},
+     *     @OA\Parameter(name="slot_id", in="query", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Winner details returned"),
+     *     @OA\Response(response=400, description="Invalid slot_id"),
+     *     @OA\Response(response=403, description="Forbidden: not from Kong gateway"),
+     *     @OA\Response(response=404, description="No winner found")
+     * )
+     */
     public function view_winner()
     {
         $this->_require_api_key();

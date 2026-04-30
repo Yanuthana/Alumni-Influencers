@@ -4,6 +4,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 require_once APPPATH . 'core/BaseApiController.php';
 
+use OpenApi\Annotations as OA;
+
+/**
+ * @OA\Tag(
+ *     name="Alumni Directory",
+ *     description="Endpoints for searching and filtering the alumni database"
+ * )
+ */
 class AlumniDirectory extends BaseApiController
 {
     public function __construct()
@@ -11,6 +19,20 @@ class AlumniDirectory extends BaseApiController
         parent::__construct();
         $this->load->database();
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/alumni/directory",
+     *     summary="Search and filter alumni",
+     *     tags={"Alumni Directory"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="programme", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="graduation_year", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="industry", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Filtered alumni list"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
 
     public function index()
     {

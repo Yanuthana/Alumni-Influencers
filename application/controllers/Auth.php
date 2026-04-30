@@ -9,7 +9,10 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 /**
- * Auth Controller - login and signup
+ * @OA\Tag(
+ *     name="Authentication",
+ *     description="Endpoints for user registration, login, and password management"
+ * )
  */
 class Auth extends BaseApiController
 {
@@ -20,6 +23,29 @@ class Auth extends BaseApiController
         $this->load->model('User_model', 'users');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/auth/register",
+     *     summary="Register a new user",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"first_name","last_name","email","password","role","date_of_birth","phone_number"},
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@my.westminster.ac.uk"),
+     *             @OA\Property(property="password", type="string", format="password", example="securePass123"),
+     *             @OA\Property(property="role", type="string", enum={"student", "alumni", "developer"}, example="alumni"),
+     *             @OA\Property(property="date_of_birth", type="string", format="date", example="1995-05-15"),
+     *             @OA\Property(property="phone_number", type="string", example="+44123456789")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="User created"),
+     *     @OA\Response(response=400, description="Validation error"),
+     *     @OA\Response(response=403, description="Forbidden email domain"),
+     *     @OA\Response(response=409, description="Email already exists")
+     * )
+     */
     // Signup a new user
     public function register(): void
     {
@@ -149,6 +175,22 @@ class Auth extends BaseApiController
     }
 
     // Verify email after signup
+    /**
+     * @OA\Post(
+     *     path="/api/auth/verify-email",
+     *     summary="Verify user email",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"token"},
+     *             @OA\Property(property="token", type="string", example="abcdef123456")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Email verified"),
+     *     @OA\Response(response=400, description="Missing token"),
+     *     @OA\Response(response=404, description="Invalid token")
+     * )
+     */
     public function verify_email(): void
     {
         $d     = $this->_json_body();
@@ -183,6 +225,24 @@ class Auth extends BaseApiController
     // Body: { email, password }
     // =================================================================
     // Log in and get token
+    /**
+     * @OA\Post(
+     *     path="/api/auth/sessions",
+     *     summary="User login",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"email","password"},
+     *             @OA\Property(property="email", type="string", format="email", example="john@my.westminster.ac.uk"),
+     *             @OA\Property(property="password", type="string", format="password", example="securePass123")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Login successful, token returned"),
+     *     @OA\Response(response=400, description="Missing credentials"),
+     *     @OA\Response(response=401, description="Invalid credentials"),
+     *     @OA\Response(response=403, description="Email not verified")
+     * )
+     */
     public function login(): void
     {
         $d        = $this->_json_body();
@@ -243,6 +303,16 @@ class Auth extends BaseApiController
     // Header: Authorization: Bearer <api_token>
     // =================================================================
     // Log out
+    /**
+     * @OA\Delete(
+     *     path="/api/auth/sessions",
+     *     summary="User logout",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Logged out"),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function logout(): void
     {
         $token = $this->_bearer_token();
@@ -274,6 +344,20 @@ class Auth extends BaseApiController
     // Body: { email }
     // =================================================================
     // Forgot password - send OTP
+    /**
+     * @OA\Post(
+     *     path="/api/auth/password/forgot",
+     *     summary="Request password reset OTP",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email", example="john@my.westminster.ac.uk")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP sent (or anti-enumeration message)")
+     * )
+     */
     public function forgot_password(): void
     {
         $d     = $this->_json_body();
@@ -333,6 +417,22 @@ class Auth extends BaseApiController
 
 
     // Check if OTP is correct
+    /**
+     * @OA\Post(
+     *     path="/api/auth/password/verify-otp",
+     *     summary="Verify reset OTP",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"email","otp"},
+     *             @OA\Property(property="email", type="string", format="email", example="john@my.westminster.ac.uk"),
+     *             @OA\Property(property="otp", type="string", example="123456")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP verified, reset token returned"),
+     *     @OA\Response(response=400, description="Invalid OTP")
+     * )
+     */
     public function verify_otp(): void
     {
         $d     = $this->_json_body();
@@ -374,6 +474,23 @@ class Auth extends BaseApiController
     // Body: { reset_token, password, confirm_password }
     // =================================================================
     // Set new password
+    /**
+     * @OA\Post(
+     *     path="/api/auth/password/reset",
+     *     summary="Reset password with token",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"reset_token","password","confirm_password"},
+     *             @OA\Property(property="reset_token", type="string", example="very-long-token"),
+     *             @OA\Property(property="password", type="string", format="password", example="newPass123"),
+     *             @OA\Property(property="confirm_password", type="string", format="password", example="newPass123")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Password reset successful"),
+     *     @OA\Response(response=400, description="Invalid token or mismatched passwords")
+     * )
+     */
     public function reset_password(): void
     {
         $d           = $this->_json_body();
